@@ -21,7 +21,8 @@ export function MetricGlass({
   tone?: "neutral" | "approved" | "warning" | "blocked";
   className?: string;
 }) {
-  const showMeter = typeof used === "number" && typeof total === "number" && total > 0;
+  const showMeter =
+    typeof used === "number" && typeof total === "number" && total > 0;
   const ratio = showMeter ? Math.min(1, used! / total!) : 0;
   const meterColor =
     tone === "blocked"
@@ -45,7 +46,10 @@ export function MetricGlass({
           aria-label={`${label}: ${used} of ${total} used`}
         >
           <div
-            className={cn("h-full rounded-full transition-[width] duration-500", meterColor)}
+            className={cn(
+              "h-full rounded-full transition-[width] duration-500",
+              meterColor,
+            )}
             style={{ width: `${Math.max(ratio * 100, used! > 0 ? 6 : 0)}%` }}
           />
         </div>

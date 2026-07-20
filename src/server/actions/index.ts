@@ -40,8 +40,7 @@ import type { ExtractionResult } from "@/domain/schemas";
 import type { Language } from "@/domain/types";
 
 export type ActionResult<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: string; code?: string };
+  { ok: true; data: T } | { ok: false; error: string; code?: string };
 
 function fail<T>(error: unknown): ActionResult<T> {
   if (error instanceof GenerationDeniedError) {
@@ -53,7 +52,9 @@ function fail<T>(error: unknown): ActionResult<T> {
   };
 }
 
-export async function switchRoleAction(role: SessionRole): Promise<ActionResult<null>> {
+export async function switchRoleAction(
+  role: SessionRole,
+): Promise<ActionResult<null>> {
   try {
     await setSessionRole(role);
     revalidatePath("/", "layout");
@@ -104,7 +105,10 @@ export async function convertToOrganicAction(
         publicationDate: original.publicationDate,
         topicTags: original.topicTags,
       },
-      { profileId: session.profile.id, organizationId: session.organization.id },
+      {
+        profileId: session.profile.id,
+        organizationId: session.organization.id,
+      },
     );
     revalidatePath("/gate");
     return { ok: true, data: { requestId: outcome.request.id } };
@@ -171,7 +175,12 @@ export async function decideAmendmentAction(
   amendmentId: string,
   verdict: "approved" | "rejected",
   note: string | null,
-): Promise<ActionResult<{ resultingPolicyVersion: number | null; rerunOutcome: string | null }>> {
+): Promise<
+  ActionResult<{
+    resultingPolicyVersion: number | null;
+    rerunOutcome: string | null;
+  }>
+> {
   try {
     const session = await requireOwnerSession();
     const result = await decideAmendment(amendmentId, verdict, note, {
@@ -212,7 +221,10 @@ export async function getConsentChallengeAction(): Promise<
   try {
     await requireOwnerSession();
     const challenge = buildConsentChallenge();
-    return { ok: true, data: { phrase: challenge.phrase, issuedAt: challenge.issuedAt } };
+    return {
+      ok: true,
+      data: { phrase: challenge.phrase, issuedAt: challenge.issuedAt },
+    };
   } catch (error) {
     return fail(error);
   }

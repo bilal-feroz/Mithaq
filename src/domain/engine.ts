@@ -76,7 +76,8 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyDecision {
           expected: "all required fields present",
           received: `missing: ${missing.join(", ")}`,
           explanation: `The request is missing required information: ${missing.join(", ")}.`,
-          suggestedRemedy: "Complete the missing fields and resubmit the request.",
+          suggestedRemedy:
+            "Complete the missing fields and resubmit the request.",
         },
   );
 
@@ -87,7 +88,8 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyDecision {
           clause: "Voice identity",
           status: "passed",
           code: "VOICE_MISMATCH",
-          explanation: "The requested voice is the voice covered by this policy.",
+          explanation:
+            "The requested voice is the voice covered by this policy.",
         }
       : {
           clause: "Voice identity",
@@ -95,8 +97,10 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyDecision {
           code: "VOICE_MISMATCH",
           expected: policy.voiceId,
           received: request.voiceId,
-          explanation: "The requested voice is not the voice covered by this consent policy.",
-          suggestedRemedy: "Select the voice this policy covers, or locate the policy for the requested voice.",
+          explanation:
+            "The requested voice is not the voice covered by this consent policy.",
+          suggestedRemedy:
+            "Select the voice this policy covers, or locate the policy for the requested voice.",
         },
   );
 
@@ -110,7 +114,8 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyDecision {
           clause: "Authorized organization",
           status: "passed",
           code: "ORGANIZATION_NOT_AUTHORIZED",
-          explanation: "The requesting organization is authorized by the owner.",
+          explanation:
+            "The requesting organization is authorized by the owner.",
         }
       : {
           clause: "Authorized organization",
@@ -118,8 +123,10 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyDecision {
           code: "ORGANIZATION_NOT_AUTHORIZED",
           expected: policy.authorizedOrganizationIds,
           received: request.organizationId,
-          explanation: "The owner has not authorized this organization to use the voice.",
-          suggestedRemedy: "Ask the voice owner to authorize your organization, or submit under an authorized organization.",
+          explanation:
+            "The owner has not authorized this organization to use the voice.",
+          suggestedRemedy:
+            "Ask the voice owner to authorize your organization, or submit under an authorized organization.",
         },
   );
 
@@ -139,7 +146,8 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyDecision {
           expected: policy.allowedPurposes,
           received: request.purpose,
           explanation: `The owner approved this voice for: ${policy.allowedPurposes.join(", ")} — not "${request.purpose}".`,
-          suggestedRemedy: "Change the campaign purpose to an approved purpose, or request an amendment.",
+          suggestedRemedy:
+            "Change the campaign purpose to an approved purpose, or request an amendment.",
         },
   );
 
@@ -159,7 +167,8 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyDecision {
           expected: policy.allowedPlatforms,
           received: request.platform,
           explanation: `The owner approved publication on: ${policy.allowedPlatforms.join(", ")} — not "${request.platform}".`,
-          suggestedRemedy: "Target an approved platform, or request an amendment for this platform.",
+          suggestedRemedy:
+            "Target an approved platform, or request an amendment for this platform.",
         },
   );
 
@@ -179,7 +188,8 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyDecision {
           expected: policy.allowedLanguages,
           received: request.language,
           explanation: `The owner approved these languages: ${policy.allowedLanguages.join(", ")} — not "${request.language}".`,
-          suggestedRemedy: "Produce the asset in an approved language, or request an amendment.",
+          suggestedRemedy:
+            "Produce the asset in an approved language, or request an amendment.",
         },
   );
 
@@ -201,7 +211,8 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyDecision {
           expected: allowedTerritories,
           received: territory,
           explanation: `The owner approved distribution in: ${allowedTerritories.join(", ")} — not "${territory}".`,
-          suggestedRemedy: "Restrict distribution to an approved territory, or request an amendment.",
+          suggestedRemedy:
+            "Restrict distribution to an approved territory, or request an amendment.",
         },
   );
 
@@ -235,7 +246,8 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyDecision {
           expected: `none of: ${prohibited.join(", ")}`,
           received: tagHits,
           explanation: `The owner explicitly prohibited ${tagHits.join(", ")} content. Explicit prohibitions override general permissions.`,
-          suggestedRemedy: "Remove the prohibited topic from this campaign. Prohibited topics cannot be unlocked by amendment scope in this policy.",
+          suggestedRemedy:
+            "Remove the prohibited topic from this campaign. Prohibited topics cannot be unlocked by amendment scope in this policy.",
         },
   );
 
@@ -259,7 +271,10 @@ export function evaluatePolicy(input: PolicyEvaluationInput): PolicyDecision {
 
 // ─────────────────────────────────────────────────────────────────────────
 
-function evaluatePolicyStatus(policy: ConsentPolicy, now: number): ClauseResult {
+function evaluatePolicyStatus(
+  policy: ConsentPolicy,
+  now: number,
+): ClauseResult {
   const clause = "Policy status";
   if (policy.status === "draft") {
     return {
@@ -268,8 +283,10 @@ function evaluatePolicyStatus(policy: ConsentPolicy, now: number): ClauseResult 
       code: "POLICY_NOT_ACTIVE",
       expected: "active",
       received: policy.status,
-      explanation: "The consent policy is still a draft. The owner has not approved it.",
-      suggestedRemedy: "Ask the voice owner to review and approve the policy in the Consent Studio.",
+      explanation:
+        "The consent policy is still a draft. The owner has not approved it.",
+      suggestedRemedy:
+        "Ask the voice owner to review and approve the policy in the Consent Studio.",
     };
   }
   if (policy.status === "superseded") {
@@ -279,8 +296,10 @@ function evaluatePolicyStatus(policy: ConsentPolicy, now: number): ClauseResult 
       code: "POLICY_SUPERSEDED",
       expected: "active",
       received: policy.status,
-      explanation: "A newer policy version replaced this one. New requests must evaluate against the active version.",
-      suggestedRemedy: "Resubmit the request against the current active policy version.",
+      explanation:
+        "A newer policy version replaced this one. New requests must evaluate against the active version.",
+      suggestedRemedy:
+        "Resubmit the request against the current active policy version.",
     };
   }
   if (policy.status === "revoked") {
@@ -293,7 +312,8 @@ function evaluatePolicyStatus(policy: ConsentPolicy, now: number): ClauseResult 
       explanation: policy.revokedAt
         ? `The owner revoked this consent policy on ${formatInstant(policy.revokedAt)}. Revocation applies to all future requests immediately.`
         : "The owner revoked this consent policy. Revocation applies to all future requests immediately.",
-      suggestedRemedy: "Only the voice owner can grant new consent by issuing a new policy.",
+      suggestedRemedy:
+        "Only the voice owner can grant new consent by issuing a new policy.",
     };
   }
   if (policy.status === "expired" || Date.parse(policy.validUntil) < now) {
@@ -315,7 +335,8 @@ function evaluatePolicyStatus(policy: ConsentPolicy, now: number): ClauseResult 
       expected: `valid from ${formatInstant(policy.validFrom)}`,
       received: "evaluation before the validity window",
       explanation: `The consent policy only takes effect on ${formatInstant(policy.validFrom)}.`,
-      suggestedRemedy: "Wait for the validity window, or ask the owner to adjust it.",
+      suggestedRemedy:
+        "Wait for the validity window, or ask the owner to adjust it.",
     };
   }
   return {
@@ -353,14 +374,16 @@ function evaluatePublicationWindow(
       expected: `between ${formatInstant(policy.validFrom)} and ${formatInstant(policy.validUntil)}`,
       received: formatInstant(request.publicationDate),
       explanation: `The intended publication date falls outside the consent window (${formatInstant(policy.validFrom)} → ${formatInstant(policy.validUntil)}).`,
-      suggestedRemedy: "Schedule publication inside the consent window, or ask the owner to extend it.",
+      suggestedRemedy:
+        "Schedule publication inside the consent window, or ask the owner to extend it.",
     };
   }
   return {
     clause,
     status: "passed",
     code: "PUBLICATION_DATE_OUTSIDE_VALIDITY",
-    explanation: "The intended publication date falls inside the consent window.",
+    explanation:
+      "The intended publication date falls inside the consent window.",
   };
 }
 
@@ -427,8 +450,10 @@ function evaluatePlacement(
     code: "PAID_ADVERTISING_PROHIBITED",
     expected: "organic placement",
     received: "paid placement",
-    explanation: "The owner prohibited paid advertising with this voice. Explicit prohibitions override general permissions.",
-    suggestedRemedy: "This request can proceed as an organic post, or you can request a narrowly scoped amendment for this campaign and platform.",
+    explanation:
+      "The owner prohibited paid advertising with this voice. Explicit prohibitions override general permissions.",
+    suggestedRemedy:
+      "This request can proceed as an organic post, or you can request a narrowly scoped amendment for this campaign and platform.",
   };
 }
 
@@ -455,7 +480,8 @@ function evaluateUsage(
           expected: `fewer than ${grant.maximumAssets} grant assets used`,
           received: `${grant.assetsUsed} used`,
           explanation: `The amendment grant's allowance is exhausted (${grant.assetsUsed} of ${grant.maximumAssets} used).`,
-          suggestedRemedy: "Request a further amendment if additional assets are genuinely needed.",
+          suggestedRemedy:
+            "Request a further amendment if additional assets are genuinely needed.",
         };
   }
   return policy.assetsUsed < policy.maximumAssets

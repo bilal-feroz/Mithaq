@@ -14,13 +14,23 @@ function Wordmark() {
         aria-hidden
         className="flex h-9 w-9 items-center justify-center rounded-[11px] border border-border-glass-strong bg-gradient-to-b from-white/[0.1] to-white/[0.02] shadow-[inset_0_1px_0_rgba(255,255,255,0.18)]"
       >
-        <ShieldCheck className="h-[18px] w-[18px] text-metal" strokeWidth={1.8} />
+        <ShieldCheck
+          className="h-[18px] w-[18px] text-metal"
+          strokeWidth={1.8}
+        />
       </span>
       <span className="min-w-0">
         <span className="display block bg-gradient-to-b from-[#f2f5f9] to-[#aeb9c7] bg-clip-text text-[17px] font-extrabold leading-none tracking-[-0.01em] text-transparent">
-          MITHAQ<span className="ml-1.5 align-middle text-[10px] font-bold tracking-[0.22em] text-metal-dim">GATE</span>
+          MITHAQ
+          <span className="ml-1.5 align-middle text-[10px] font-bold tracking-[0.22em] text-metal-dim">
+            GATE
+          </span>
         </span>
-        <span lang="ar" dir="rtl" className="block text-right text-[11px] leading-snug text-text-muted">
+        <span
+          lang="ar"
+          dir="rtl"
+          className="block text-right text-[11px] leading-snug text-text-muted"
+        >
           ميثاق — بوابة الإذن الصوتي
         </span>
       </span>
@@ -35,7 +45,9 @@ function ProviderBadge({ mock }: { mock: boolean }) {
       className="flex items-center gap-2 rounded-[9px] border border-border-glass bg-black/25 px-2.5 py-2"
     >
       <Waves
-        className={mock ? "h-3.5 w-3.5 text-warning" : "h-3.5 w-3.5 text-approved"}
+        className={
+          mock ? "h-3.5 w-3.5 text-warning" : "h-3.5 w-3.5 text-approved"
+        }
         strokeWidth={1.9}
         aria-hidden
       />
@@ -52,16 +64,39 @@ function ProviderBadge({ mock }: { mock: boolean }) {
 }
 
 export async function AppShell({ children }: { children: ReactNode }) {
-  const [session, env] = await Promise.all([getSession(), Promise.resolve(getEnv())]);
+  const [session, env] = await Promise.all([
+    getSession(),
+    Promise.resolve(getEnv()),
+  ]);
   const mockProvider = env.voiceProvider === "mock";
 
   const nav = (
     <nav aria-label="Primary" className="flex flex-col gap-1">
       <NavLink href="/" label="Overview" iconName="overview" />
-      <NavLink href="/studio" label="Consent Studio" hint="voice owner" iconName="studio" />
-      <NavLink href="/gate" label="Generation Gate" hint="requester" iconName="gate" />
-      <NavLink href="/console" label="Owner Console" hint="voice owner" iconName="console" />
-      <NavLink href="/verify" label="Public Verifier" hint="anyone" iconName="verify" />
+      <NavLink
+        href="/studio"
+        label="Consent Studio"
+        hint="voice owner"
+        iconName="studio"
+      />
+      <NavLink
+        href="/gate"
+        label="Generation Gate"
+        hint="requester"
+        iconName="gate"
+      />
+      <NavLink
+        href="/console"
+        label="Owner Console"
+        hint="voice owner"
+        iconName="console"
+      />
+      <NavLink
+        href="/verify"
+        label="Public Verifier"
+        hint="anyone"
+        iconName="verify"
+      />
     </nav>
   );
 
@@ -94,10 +129,10 @@ export async function AppShell({ children }: { children: ReactNode }) {
           <Wordmark />
           <details className="relative">
             <summary className="action-quiet min-h-[38px] cursor-pointer list-none px-3 py-1.5 text-[12.5px] [&::-webkit-details-marker]:hidden">
-              {session.role === "owner" ? "Awaiz · Owner" : "Bilal · Requester"}
+              {session.role === "owner" ? "Umar · Owner" : "Bilal · Requester"}
             </summary>
             <div className="absolute right-0 top-[calc(100%+8px)] z-40 w-64 rounded-[14px] border border-border-glass-strong bg-[rgba(14,18,26,0.97)] p-2 shadow-raised">
-              <RoleSwitcher current={session.role} />
+              <RoleSwitcher current={session.role} testIdSuffix="-mobile" />
               {env.demoMode && (
                 <div className="mt-2 flex justify-end">
                   <ResetDemoButton />
@@ -106,7 +141,10 @@ export async function AppShell({ children }: { children: ReactNode }) {
             </div>
           </details>
         </div>
-        <nav aria-label="Primary mobile" className="mt-3 flex gap-1.5 overflow-x-auto pb-0.5">
+        <nav
+          aria-label="Primary mobile"
+          className="mt-3 flex gap-1.5 overflow-x-auto pb-0.5"
+        >
           {[
             { href: "/", label: "Overview" },
             { href: "/studio", label: "Consent Studio" },

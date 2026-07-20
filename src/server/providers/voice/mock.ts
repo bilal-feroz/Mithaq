@@ -21,7 +21,11 @@ export class MockVoiceProvider implements VoiceGenerationProvider {
     script: string;
     language: string;
     model?: string;
-  }): Promise<{ audioBuffer: Buffer; mimeType: string; providerAssetId?: string }> {
+  }): Promise<{
+    audioBuffer: Buffer;
+    mimeType: string;
+    providerAssetId?: string;
+  }> {
     const seedHex = sha256Hex(`${input.voiceId}:${hashScript(input.script)}`);
     const audioBuffer = renderVoiceLikeWav(seedHex, input.script.length);
     return {

@@ -20,7 +20,11 @@ export function RoleNotice({
   return (
     <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[12px] border border-informational/25 bg-informational-soft px-4 py-3">
       <p className="flex items-center gap-2 text-[13px] text-text-primary">
-        <UserRound className="h-4 w-4 text-informational" strokeWidth={1.9} aria-hidden />
+        <UserRound
+          className="h-4 w-4 text-informational"
+          strokeWidth={1.9}
+          aria-hidden
+        />
         {message}
       </p>
       <button

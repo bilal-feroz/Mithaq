@@ -23,7 +23,11 @@ export class ElevenLabsVoiceProvider implements VoiceGenerationProvider {
     script: string;
     language: string;
     model?: string;
-  }): Promise<{ audioBuffer: Buffer; mimeType: string; providerAssetId?: string }> {
+  }): Promise<{
+    audioBuffer: Buffer;
+    mimeType: string;
+    providerAssetId?: string;
+  }> {
     const providerVoiceId = this.config.defaultVoiceId ?? input.voiceId;
     const model = input.model ?? DEFAULT_MODEL;
 

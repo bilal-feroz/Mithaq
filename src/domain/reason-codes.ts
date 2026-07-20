@@ -41,7 +41,8 @@ export const REASON_CODE_MESSAGES: Record<ReasonCode, string> = {
   PLATFORM_NOT_ALLOWED: "This platform is not permitted",
   LANGUAGE_NOT_ALLOWED: "This language is not permitted",
   TERRITORY_NOT_ALLOWED: "This territory is not permitted",
-  PUBLICATION_DATE_OUTSIDE_VALIDITY: "Publication date falls outside the consent window",
+  PUBLICATION_DATE_OUTSIDE_VALIDITY:
+    "Publication date falls outside the consent window",
   PAID_ADVERTISING_PROHIBITED: "Paid advertising is prohibited",
   PROHIBITED_TOPIC: "The content touches a prohibited topic",
   USAGE_LIMIT_REACHED: "The authorized usage allowance is exhausted",

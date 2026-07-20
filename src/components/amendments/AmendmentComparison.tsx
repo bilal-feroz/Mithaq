@@ -29,7 +29,10 @@ export function AmendmentComparison({
 }) {
   const reduced = useReducedMotion();
   return (
-    <section className="glass-strong halo-informational overflow-hidden p-0" aria-label="Policy comparison">
+    <section
+      className="glass-strong halo-informational overflow-hidden p-0"
+      aria-label="Policy comparison"
+    >
       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2 border-b border-border-glass px-5 py-4 md:px-7">
         <div className={cn("min-w-0", decided && "opacity-55")}>
           <p className="micro-label">Current policy</p>
@@ -67,7 +70,11 @@ export function AmendmentComparison({
             key={row.label}
             initial={reduced ? false : { opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.12 + index * 0.05, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{
+              duration: 0.3,
+              delay: 0.12 + index * 0.05,
+              ease: [0.2, 0.8, 0.2, 1],
+            }}
             className={cn(
               "grid grid-cols-1 gap-1 border-b border-border-glass/60 px-5 py-3.5 last:border-b-0 md:grid-cols-[200px_1fr_auto_1fr] md:items-center md:gap-4 md:px-7",
               row.changed && "bg-informational-soft/40",
@@ -77,12 +84,17 @@ export function AmendmentComparison({
             <dd
               className={cn(
                 "text-[13px]",
-                row.changed ? "text-text-muted line-through decoration-text-muted/50" : "text-text-secondary",
+                row.changed
+                  ? "text-text-muted line-through decoration-text-muted/50"
+                  : "text-text-secondary",
               )}
             >
               {row.current}
             </dd>
-            <ArrowRight className="hidden h-3.5 w-3.5 text-text-muted md:block" aria-hidden />
+            <ArrowRight
+              className="hidden h-3.5 w-3.5 text-text-muted md:block"
+              aria-hidden
+            />
             <dd
               className={cn(
                 "text-[13px] font-medium",

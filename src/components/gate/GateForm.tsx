@@ -59,7 +59,9 @@ export function GateForm({
     const current = form.getValues("topicTags");
     form.setValue(
       "topicTags",
-      current.includes(tag) ? current.filter((t) => t !== tag) : [...current, tag],
+      current.includes(tag)
+        ? current.filter((t) => t !== tag)
+        : [...current, tag],
       { shouldValidate: true },
     );
   }
@@ -81,13 +83,20 @@ export function GateForm({
     form.formState.errors[name]?.message as string | undefined;
 
   return (
-    <GlassPanel eyebrow="Generation request" title="Request authorization" className="lg:sticky lg:top-8">
+    <GlassPanel
+      eyebrow="Generation request"
+      title="Request authorization"
+      className="lg:sticky lg:top-8"
+    >
       <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
         <div>
           <label htmlFor="voice" className="micro-label mb-1.5 block">
             Voice identity
           </label>
-          <div id="voice" className="glass-inset flex items-center gap-3 px-3.5 py-2.5">
+          <div
+            id="voice"
+            className="glass-inset flex items-center gap-3 px-3.5 py-2.5"
+          >
             <span
               aria-hidden
               className="flex h-8 w-8 items-center justify-center rounded-full bg-informational-soft text-[12px] font-bold text-informational"
@@ -123,10 +132,17 @@ export function GateForm({
               {fieldError("script")}
             </p>
           )}
-          <p id="script-note" className="mt-1.5 flex items-center gap-1.5 text-[11px] text-text-muted">
-            <ShieldCheck className="h-3 w-3 shrink-0" strokeWidth={2} aria-hidden />
-            Script text is inert data. Instructions inside it can never influence
-            authorization.
+          <p
+            id="script-note"
+            className="mt-1.5 flex items-center gap-1.5 text-[11px] text-text-muted"
+          >
+            <ShieldCheck
+              className="h-3 w-3 shrink-0"
+              strokeWidth={2}
+              aria-hidden
+            />
+            Script text is inert data. Instructions inside it can never
+            influence authorization.
           </p>
         </div>
 
@@ -143,26 +159,37 @@ export function GateForm({
               {...form.register("campaignName")}
             />
             {fieldError("campaignName") && (
-              <p className="mt-1 text-[12px] text-blocked">{fieldError("campaignName")}</p>
+              <p className="mt-1 text-[12px] text-blocked">
+                {fieldError("campaignName")}
+              </p>
             )}
           </div>
 
           <SelectField
             id="purpose"
             label="Purpose"
-            options={PURPOSES.map((value) => ({ value, label: PURPOSE_LABELS[value] }))}
+            options={PURPOSES.map((value) => ({
+              value,
+              label: PURPOSE_LABELS[value],
+            }))}
             register={form.register("purpose")}
           />
           <SelectField
             id="platform"
             label="Platform"
-            options={PLATFORMS.map((value) => ({ value, label: PLATFORM_LABELS[value] }))}
+            options={PLATFORMS.map((value) => ({
+              value,
+              label: PLATFORM_LABELS[value],
+            }))}
             register={form.register("platform")}
           />
           <SelectField
             id="language"
             label="Language"
-            options={LANGUAGES.map((value) => ({ value, label: LANGUAGE_LABELS[value] }))}
+            options={LANGUAGES.map((value) => ({
+              value,
+              label: LANGUAGE_LABELS[value],
+            }))}
             register={form.register("language")}
           />
           <SelectField
@@ -187,6 +214,7 @@ export function GateForm({
               {PLACEMENTS.map((value) => (
                 <label
                   key={value}
+                  data-testid={`placement-${value}`}
                   className={cn(
                     "flex min-h-[38px] cursor-pointer items-center justify-center rounded-[8px] text-[13px] font-semibold transition-colors duration-150",
                     placement === value
@@ -200,7 +228,6 @@ export function GateForm({
                     type="radio"
                     value={value}
                     className="sr-only"
-                    data-testid={`placement-${value}`}
                     {...form.register("placement")}
                   />
                   {PLACEMENT_LABELS[value]}
@@ -210,7 +237,10 @@ export function GateForm({
           </div>
 
           <div>
-            <label htmlFor="publicationDate" className="micro-label mb-1.5 block">
+            <label
+              htmlFor="publicationDate"
+              className="micro-label mb-1.5 block"
+            >
               Publication date
             </label>
             <input
@@ -226,7 +256,11 @@ export function GateForm({
             <span className="micro-label mb-1.5 block" id="topics-label">
               Topic tags
             </span>
-            <div role="group" aria-labelledby="topics-label" className="flex flex-wrap gap-1.5">
+            <div
+              role="group"
+              aria-labelledby="topics-label"
+              className="flex flex-wrap gap-1.5"
+            >
               {TOPIC_SUGGESTIONS.map((tag) => {
                 const active = topicTags.includes(tag);
                 return (
@@ -254,7 +288,10 @@ export function GateForm({
         </div>
 
         {serverError && (
-          <p role="alert" className="flex items-start gap-2 rounded-[10px] border border-blocked/30 bg-blocked-soft px-3 py-2.5 text-[12.5px] text-blocked">
+          <p
+            role="alert"
+            className="flex items-start gap-2 rounded-[10px] border border-blocked/30 bg-blocked-soft px-3 py-2.5 text-[12.5px] text-blocked"
+          >
             <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
             {serverError}
           </p>
@@ -304,7 +341,11 @@ function SelectField({
       </label>
       <select id={id} className="field appearance-none" {...register}>
         {options.map((option) => (
-          <option key={option.value} value={option.value} className="bg-background-elevated">
+          <option
+            key={option.value}
+            value={option.value}
+            className="bg-background-elevated"
+          >
             {option.label}
           </option>
         ))}

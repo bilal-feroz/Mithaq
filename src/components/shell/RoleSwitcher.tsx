@@ -15,7 +15,7 @@ const ROLES: {
 }[] = [
   {
     role: "owner",
-    name: "Awaiz",
+    name: "Umar",
     descriptor: "Voice owner",
     initials: "AA",
     testId: "role-switch-owner",
@@ -33,7 +33,13 @@ const ROLES: {
  * Persona switcher for the hackathon demo mode. The current role must always
  * be obvious — it is pinned to the shell on every screen.
  */
-export function RoleSwitcher({ current }: { current: SessionRole }) {
+export function RoleSwitcher({
+  current,
+  testIdSuffix = "",
+}: {
+  current: SessionRole;
+  testIdSuffix?: string;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -63,7 +69,7 @@ export function RoleSwitcher({ current }: { current: SessionRole }) {
             type="button"
             role="radio"
             aria-checked={active}
-            data-testid={entry.testId}
+            data-testid={`${entry.testId}${testIdSuffix}`}
             onClick={() => switchTo(entry.role)}
             disabled={isPending}
             className={cn(
@@ -98,7 +104,10 @@ export function RoleSwitcher({ current }: { current: SessionRole }) {
               </span>
             </span>
             {active && (
-              <span className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-informational" aria-hidden />
+              <span
+                className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full bg-informational"
+                aria-hidden
+              />
             )}
           </button>
         );

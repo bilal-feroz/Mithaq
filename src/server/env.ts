@@ -13,14 +13,24 @@ import { randomBytes } from "node:crypto";
 import { z } from "zod";
 
 const rawEnvSchema = z.object({
-  NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
-  NEXT_PUBLIC_APP_URL: z.string().url().optional().or(z.literal("").transform(() => undefined)),
+  NODE_ENV: z
+    .enum(["development", "test", "production"])
+    .default("development"),
+  NEXT_PUBLIC_APP_URL: z
+    .string()
+    .url()
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
 
   NEXT_PUBLIC_SUPABASE_URL: z.string().optional(),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
 
-  DECISION_TOKEN_SECRET: z.string().min(32).optional().or(z.literal("").transform(() => undefined)),
+  DECISION_TOKEN_SECRET: z
+    .string()
+    .min(32)
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
 
   AI_PROVIDER: z.enum(["mock", "anthropic", "openai"]).default("mock"),
   ANTHROPIC_API_KEY: z.string().optional(),

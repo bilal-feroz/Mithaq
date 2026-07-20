@@ -35,7 +35,10 @@ export function RevokeZone({
             <ShieldOff className="h-5 w-5 text-blocked" strokeWidth={1.8} />
           </span>
           <div>
-            <h2 id="danger-zone-title" className="display text-[16px] font-semibold text-text-primary">
+            <h2
+              id="danger-zone-title"
+              className="display text-[16px] font-semibold text-text-primary"
+            >
               Revoke consent policy v{policyVersion}
             </h2>
             <p className="mt-1 max-w-[62ch] text-[12.5px] leading-relaxed text-text-secondary">
@@ -62,7 +65,10 @@ export function RevokeZone({
             aria-label="Confirm revocation"
             className="flex flex-wrap items-center gap-2.5 rounded-[12px] border border-blocked/35 bg-blocked-soft px-4 py-3"
           >
-            <AlertTriangle className="h-4 w-4 shrink-0 text-blocked" aria-hidden />
+            <AlertTriangle
+              className="h-4 w-4 shrink-0 text-blocked"
+              aria-hidden
+            />
             <span className="text-[13px] font-medium text-text-primary">
               This takes effect immediately. Revoke consent?
             </span>

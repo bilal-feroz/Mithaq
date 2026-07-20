@@ -12,7 +12,11 @@ export default function VerifyIndexPage() {
       <Reveal>
         <div className="pt-6 text-center">
           <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-border-glass-strong bg-white/[0.05]">
-            <ScanSearch className="h-7 w-7 text-metal" strokeWidth={1.6} aria-hidden />
+            <ScanSearch
+              className="h-7 w-7 text-metal"
+              strokeWidth={1.6}
+              aria-hidden
+            />
           </span>
           <SecurityLabel className="mt-5 justify-center">
             Public verification

@@ -79,13 +79,17 @@ export interface DataStore {
     status: RequestStatus,
     updatedAt: string,
   ): Promise<void>;
-  listRequestsForOrganization(organizationId: string): Promise<GenerationRequest[]>;
+  listRequestsForOrganization(
+    organizationId: string,
+  ): Promise<GenerationRequest[]>;
   listRequestsForOwner(ownerId: string): Promise<GenerationRequest[]>;
 
   // ── decisions ────────────────────────────────────────────────────────
   insertDecision(decision: StoredDecision): Promise<void>;
   getDecision(id: string): Promise<StoredDecision | null>;
-  getLatestDecisionForRequest(requestId: string): Promise<StoredDecision | null>;
+  getLatestDecisionForRequest(
+    requestId: string,
+  ): Promise<StoredDecision | null>;
   listDecisionsForRequest(requestId: string): Promise<StoredDecision[]>;
 
   // ── decision tokens ──────────────────────────────────────────────────
@@ -101,14 +105,20 @@ export interface DataStore {
   updateAmendment(amendment: AmendmentRequest): Promise<void>;
   getAmendment(id: string): Promise<AmendmentRequest | null>;
   listAmendmentsForOwner(ownerId: string): Promise<AmendmentRequest[]>;
-  listAmendmentsForOrganization(organizationId: string): Promise<AmendmentRequest[]>;
-  getPendingAmendmentForRequest(requestId: string): Promise<AmendmentRequest | null>;
+  listAmendmentsForOrganization(
+    organizationId: string,
+  ): Promise<AmendmentRequest[]>;
+  getPendingAmendmentForRequest(
+    requestId: string,
+  ): Promise<AmendmentRequest | null>;
   listAmendmentsForRequest(requestId: string): Promise<AmendmentRequest[]>;
 
   // ── generated assets ─────────────────────────────────────────────────
   insertAsset(asset: GeneratedAsset, bytes: Buffer): Promise<void>;
   getAsset(id: string): Promise<GeneratedAsset | null>;
-  getAssetByVerificationId(verificationId: string): Promise<GeneratedAsset | null>;
+  getAssetByVerificationId(
+    verificationId: string,
+  ): Promise<GeneratedAsset | null>;
   getAssetBytes(id: string): Promise<Buffer | null>;
   getAssetForRequest(requestId: string): Promise<GeneratedAsset | null>;
   listAssetsForOrganization(organizationId: string): Promise<GeneratedAsset[]>;

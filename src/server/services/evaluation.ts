@@ -124,7 +124,8 @@ async function evaluateAndPersist(
   await store.appendAuditEvent({
     aggregateType: "policy_decision",
     aggregateId: stored.id,
-    eventType: stored.outcome === "approved" ? "decision.approved" : "decision.blocked",
+    eventType:
+      stored.outcome === "approved" ? "decision.approved" : "decision.blocked",
     actorId: actorProfileId,
     payload: {
       decisionId: stored.id,

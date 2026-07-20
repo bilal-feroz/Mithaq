@@ -62,7 +62,9 @@ export function verifyAuditChain(events: AuditEvent[]): AuditChainVerification {
         },
       };
     }
-    if (computeEventHash(event.payload, previousHash) !== event.currentEventHash) {
+    if (
+      computeEventHash(event.payload, previousHash) !== event.currentEventHash
+    ) {
       return {
         valid: false,
         checkedEvents: index + 1,

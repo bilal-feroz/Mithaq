@@ -27,13 +27,16 @@ export default async function AmendmentPage({
   const amendment = await store.getAmendment(id);
   if (!amendment) notFound();
 
-  const [policy, request, requester, organization, resultingPolicy] = await Promise.all([
-    store.getPolicy(amendment.policyId),
-    store.getRequest(amendment.requestId),
-    store.getProfile(amendment.requestedById),
-    store.getOrganization(amendment.organizationId),
-    amendment.resultingPolicyId ? store.getPolicy(amendment.resultingPolicyId) : null,
-  ]);
+  const [policy, request, requester, organization, resultingPolicy] =
+    await Promise.all([
+      store.getPolicy(amendment.policyId),
+      store.getRequest(amendment.requestId),
+      store.getProfile(amendment.requestedById),
+      store.getOrganization(amendment.organizationId),
+      amendment.resultingPolicyId
+        ? store.getPolicy(amendment.resultingPolicyId)
+        : null,
+    ]);
   if (!policy || !request) notFound();
 
   const rerunDecision =
@@ -82,7 +85,7 @@ export default async function AmendmentPage({
         <RoleNotice
           message="Only the voice owner can decide this amendment."
           targetRole="owner"
-          targetLabel="Switch to Awaiz — owner"
+          targetLabel="Switch to Umar — owner"
         />
       )}
 
@@ -93,7 +96,10 @@ export default async function AmendmentPage({
               aria-hidden
               className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] border border-informational/30 bg-informational-soft"
             >
-              <Bot className="h-[18px] w-[18px] text-informational" strokeWidth={1.8} />
+              <Bot
+                className="h-[18px] w-[18px] text-informational"
+                strokeWidth={1.8}
+              />
             </span>
             <blockquote className="text-[13.5px] leading-relaxed text-text-secondary">
               {amendment.proposal.rationale}
@@ -114,7 +120,10 @@ export default async function AmendmentPage({
           rows={[
             {
               label: "Paid advertising",
-              current: policy.paidAdvertising === "prohibited" ? "Prohibited" : "Allowed",
+              current:
+                policy.paidAdvertising === "prohibited"
+                  ? "Prohibited"
+                  : "Allowed",
               proposed: `One paid ${PLATFORM_LABELS[amendment.proposal.platform]} placement`,
               changed: true,
             },
@@ -151,7 +160,10 @@ export default async function AmendmentPage({
           amendmentId={amendment.id}
           status={amendment.status}
           isOwner={session.role === "owner"}
-          resultingVersion={resultingPolicy?.version ?? amendment.resultingPolicyVersion}
+          proposedVersion={policy.version + 1}
+          resultingVersion={
+            resultingPolicy?.version ?? amendment.resultingPolicyVersion
+          }
           rerunOutcome={rerunDecision?.outcome ?? null}
           requestId={amendment.requestId}
           ownerDecisionAt={amendment.ownerDecisionAt}

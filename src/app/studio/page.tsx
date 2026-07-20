@@ -39,15 +39,19 @@ export default async function StudioPage() {
         <RoleNotice
           message="You are viewing as Bilal (requester). Consent is granted by the voice owner."
           targetRole="owner"
-          targetLabel="Switch to Awaiz — owner"
+          targetLabel="Switch to Umar — owner"
         />
       )}
 
       <StudioFlow
         voice={voice ? { id: voice.id, name: voice.displayName } : null}
-        organizations={organization ? [{ id: organization.id, name: organization.name }] : []}
+        organizations={
+          organization ? [{ id: organization.id, name: organization.name }] : []
+        }
         challengePhrase={challenge.phrase}
-        existingPolicyVersion={latestPolicy?.status === "active" ? latestPolicy.version : null}
+        existingPolicyVersion={
+          latestPolicy?.status === "active" ? latestPolicy.version : null
+        }
         aiProvider={env.aiProvider}
         isOwner={session.role === "owner"}
       />

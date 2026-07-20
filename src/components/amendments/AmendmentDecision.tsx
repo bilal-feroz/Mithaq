@@ -11,6 +11,7 @@ export function AmendmentDecision({
   amendmentId,
   status,
   isOwner,
+  proposedVersion,
   resultingVersion,
   rerunOutcome,
   requestId,
@@ -19,6 +20,7 @@ export function AmendmentDecision({
   amendmentId: string;
   status: "pending" | "approved" | "rejected";
   isOwner: boolean;
+  proposedVersion: number;
   resultingVersion: number | null;
   rerunOutcome: string | null;
   requestId: string;
@@ -32,7 +34,11 @@ export function AmendmentDecision({
   function decide(verdict: "approved" | "rejected") {
     setError(null);
     startTransition(async () => {
-      const result = await decideAmendmentAction(amendmentId, verdict, note || null);
+      const result = await decideAmendmentAction(
+        amendmentId,
+        verdict,
+        note || null,
+      );
       if (!result.ok) setError(result.error);
       router.refresh();
     });
@@ -46,7 +52,11 @@ export function AmendmentDecision({
         aria-live="polite"
       >
         <div className="flex items-start gap-3.5">
-          <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-approved" strokeWidth={1.8} aria-hidden />
+          <CheckCircle2
+            className="mt-0.5 h-6 w-6 shrink-0 text-approved"
+            strokeWidth={1.8}
+            aria-hidden
+          />
           <div className="min-w-0 flex-1">
             <h2 className="display text-[18px] font-bold text-text-primary">
               Amendment approved — policy version {resultingVersion} is active
@@ -61,7 +71,11 @@ export function AmendmentDecision({
                   — outcome:{" "}
                   <strong
                     data-testid="rerun-outcome"
-                    className={rerunOutcome === "approved" ? "text-approved" : "text-blocked"}
+                    className={
+                      rerunOutcome === "approved"
+                        ? "text-approved"
+                        : "text-blocked"
+                    }
                   >
                     {rerunOutcome.toUpperCase()}
                   </strong>
@@ -92,7 +106,11 @@ export function AmendmentDecision({
     return (
       <section className="glass-panel border-blocked/25 p-6" aria-live="polite">
         <div className="flex items-start gap-3.5">
-          <XCircle className="mt-0.5 h-6 w-6 shrink-0 text-blocked" strokeWidth={1.8} aria-hidden />
+          <XCircle
+            className="mt-0.5 h-6 w-6 shrink-0 text-blocked"
+            strokeWidth={1.8}
+            aria-hidden
+          />
           <div>
             <h2 className="display text-[17px] font-bold text-text-primary">
               Amendment rejected
@@ -116,10 +134,11 @@ export function AmendmentDecision({
     <section className="glass-panel p-6" aria-label="Your decision">
       <h2 className="micro-label">Your decision</h2>
       <p className="mt-2 max-w-[64ch] text-[13px] leading-relaxed text-text-secondary">
-        Approving issues policy version{" "}
-        <strong className="text-text-primary">next</strong> with this single
-        scoped exception. Nothing else changes, the current version is preserved,
-        and the blocked request re-evaluates automatically.
+        Approving issues policy{" "}
+        <strong className="text-text-primary">version {proposedVersion}</strong>{" "}
+        with this single scoped exception. Nothing else changes, the current
+        version is preserved, and the blocked request re-evaluates
+        automatically.
       </p>
       <label htmlFor="decision-note" className="micro-label mt-4 block">
         Note to requester (optional)

@@ -19,7 +19,9 @@ export function SecurityLabel({
         className,
       )}
     >
-      {icon ?? <ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.9} aria-hidden />}
+      {icon ?? (
+        <ShieldCheck className="h-3.5 w-3.5" strokeWidth={1.9} aria-hidden />
+      )}
       {children}
     </span>
   );

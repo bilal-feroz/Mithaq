@@ -14,11 +14,31 @@ import { Reveal } from "@/components/glass/Reveal";
 import { EnterAs } from "@/components/shell/EnterAs";
 
 const PIPELINE = [
-  { icon: Mic2, title: "Consent", text: "The owner grants terms in plain language — Arabic or English." },
-  { icon: FileSignature, title: "Policy", text: "AI extracts; the owner reviews and approves a versioned policy." },
-  { icon: ShieldCheck, title: "Gate", text: "A deterministic engine evaluates every request, clause by clause." },
-  { icon: KeyRound, title: "Token", text: "Approval mints a 60-second, single-use, request-bound token." },
-  { icon: ScanSearch, title: "Verify", text: "Every asset is hashed and publicly verifiable — revocation shows instantly." },
+  {
+    icon: Mic2,
+    title: "Consent",
+    text: "The owner grants terms in plain language — Arabic or English.",
+  },
+  {
+    icon: FileSignature,
+    title: "Policy",
+    text: "AI extracts; the owner reviews and approves a versioned policy.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Gate",
+    text: "A deterministic engine evaluates every request, clause by clause.",
+  },
+  {
+    icon: KeyRound,
+    title: "Token",
+    text: "Approval mints a 60-second, single-use, request-bound token.",
+  },
+  {
+    icon: ScanSearch,
+    title: "Verify",
+    text: "Every asset is hashed and publicly verifiable — revocation shows instantly.",
+  },
 ];
 
 export default async function LandingPage() {
@@ -29,7 +49,9 @@ export default async function LandingPage() {
     <div className="grid-overlay -mx-4 -mt-6 px-4 pt-10 sm:-mx-6 sm:px-6 md:-mx-8 md:px-8 lg:-mx-10 lg:-mt-9 lg:px-10 lg:pt-14 xl:-mx-14 xl:px-14">
       <div className="mx-auto max-w-[1200px]">
         <Reveal>
-          <SecurityLabel>Verifiable consent &amp; enforcement for AI voices</SecurityLabel>
+          <SecurityLabel>
+            Verifiable consent &amp; enforcement for AI voices
+          </SecurityLabel>
           <h1 className="display mt-4 max-w-[17ch] text-[clamp(30px,4.6vw,54px)] font-extrabold leading-[1.06] tracking-[-0.03em] text-text-primary">
             Consent registries declare what is allowed.{" "}
             <span className="bg-gradient-to-b from-[#eef2f7] to-[#93a1b3] bg-clip-text text-transparent">
@@ -54,7 +76,7 @@ export default async function LandingPage() {
               eyebrow="Live demo policy"
               title={
                 <>
-                  Awaiz Demo Voice — policy passport{" "}
+                  Umar Demo Voice — policy passport{" "}
                   <span className="forensic ml-1 text-[11px] font-medium text-text-muted">
                     v{policy?.version ?? 1}
                   </span>
@@ -69,14 +91,32 @@ export default async function LandingPage() {
                     <PolicyChip label="purpose" value="Brand promotion" />
                     <PolicyChip label="platforms" value="Instagram · YouTube" />
                     <PolicyChip label="languages" value="Arabic · English" />
-                    <PolicyChip label="territories" value="UAE · Saudi Arabia" />
+                    <PolicyChip
+                      label="territories"
+                      value="UAE · Saudi Arabia"
+                    />
                     <PolicyChip
                       label="placement"
-                      value={policy.paidAdvertising === "prohibited" ? "Organic only" : "Paid allowed"}
-                      tone={policy.paidAdvertising === "prohibited" ? "warning" : "approved"}
+                      value={
+                        policy.paidAdvertising === "prohibited"
+                          ? "Organic only"
+                          : "Paid allowed"
+                      }
+                      tone={
+                        policy.paidAdvertising === "prohibited"
+                          ? "warning"
+                          : "approved"
+                      }
                     />
-                    <PolicyChip label="assets" value={`${policy.assetsUsed} of ${policy.maximumAssets} used`} />
-                    <PolicyChip label="prohibited" value="Political content" tone="blocked" />
+                    <PolicyChip
+                      label="assets"
+                      value={`${policy.assetsUsed} of ${policy.maximumAssets} used`}
+                    />
+                    <PolicyChip
+                      label="prohibited"
+                      value="Political content"
+                      tone="blocked"
+                    />
                     <PolicyChip label="until" value="30 Jul 2026" />
                   </ChipGroup>
                   <blockquote
@@ -86,8 +126,8 @@ export default async function LandingPage() {
                     “{policy.sourceConsentText}”
                   </blockquote>
                   <p className="mt-3 text-[11.5px] text-text-muted">
-                    Natural-language consent above · enforced terms as chips. The
-                    engine reads only the structured, owner-approved terms.
+                    Natural-language consent above · enforced terms as chips.
+                    The engine reads only the structured, owner-approved terms.
                   </p>
                 </>
               ) : (
@@ -100,7 +140,7 @@ export default async function LandingPage() {
 
           <div className="flex flex-col gap-5">
             <Reveal delay={0.14}>
-              <GlassPanel eyebrow="Voice owner" title="Awaiz Ahmed">
+              <GlassPanel eyebrow="Voice owner" title="Umar">
                 <p className="mb-4 text-[13px] leading-relaxed text-text-secondary">
                   Review consent terms, approve amendments, watch usage — and
                   revoke everything with one decision.
@@ -108,13 +148,16 @@ export default async function LandingPage() {
                 <EnterAs
                   role="owner"
                   href="/console"
-                  label="Enter as Awaiz — Owner Console"
+                  label="Enter as Umar — Owner Console"
                   testId="enter-owner"
                 />
               </GlassPanel>
             </Reveal>
             <Reveal delay={0.2}>
-              <GlassPanel eyebrow="Organization requester" title="Bilal · Kanban Studios">
+              <GlassPanel
+                eyebrow="Organization requester"
+                title="Bilal · Kanban Studios"
+              >
                 <p className="mb-4 text-[13px] leading-relaxed text-text-secondary">
                   Submit generation requests through the gate and watch every
                   clause evaluate deterministically.
@@ -138,23 +181,34 @@ export default async function LandingPage() {
                 <span className="forensic absolute right-3 top-3 text-[10px] text-text-muted">
                   0{index + 1}
                 </span>
-                <step.icon className="h-[18px] w-[18px] text-metal" strokeWidth={1.7} aria-hidden />
-                <p className="mt-2.5 text-[13.5px] font-semibold text-text-primary">{step.title}</p>
-                <p className="mt-1 text-[12px] leading-relaxed text-text-muted">{step.text}</p>
+                <step.icon
+                  className="h-[18px] w-[18px] text-metal"
+                  strokeWidth={1.7}
+                  aria-hidden
+                />
+                <p className="mt-2.5 text-[13.5px] font-semibold text-text-primary">
+                  {step.title}
+                </p>
+                <p className="mt-1 text-[12px] leading-relaxed text-text-muted">
+                  {step.text}
+                </p>
               </li>
             ))}
           </ol>
         </Reveal>
 
-        <Reveal delay={0.3} className="mt-12 border-t border-border-glass pt-6 pb-4">
+        <Reveal
+          delay={0.3}
+          className="mt-12 border-t border-border-glass pt-6 pb-4"
+        >
           <p className="max-w-[88ch] text-[11.5px] leading-relaxed text-text-muted">
             MITHAQ does not prove legal identity, legal ownership of a voice or
             universal legal validity. This prototype enforces a registered
-            account owner&apos;s approved policy within an organization-controlled
-            generation pipeline. The LLM extracts and explains; it never
-            authorizes — every allow/block decision is made by a deterministic
-            policy engine. Voice generation today; avatar support is roadmap
-            only.
+            account owner&apos;s approved policy within an
+            organization-controlled generation pipeline. The LLM extracts and
+            explains; it never authorizes — every allow/block decision is made
+            by a deterministic policy engine. Voice generation today; avatar
+            support is roadmap only.
           </p>
         </Reveal>
       </div>

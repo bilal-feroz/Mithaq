@@ -29,7 +29,7 @@ export {
 
 export const DEMO_OWNER: Profile = {
   id: DEMO_IDS.owner,
-  displayName: "Awaiz Ahmed",
+  displayName: "Umar",
   role: "owner",
   title: "Voice owner",
 };
@@ -50,7 +50,7 @@ export const DEMO_ORGANIZATION: Organization = {
 export const DEMO_VOICE: VoiceProfile = {
   id: DEMO_IDS.voice,
   ownerId: DEMO_IDS.owner,
-  displayName: "Awaiz Demo Voice",
+  displayName: "Umar Demo Voice",
   providerVoiceId: null,
   description: "Warm bilingual (Arabic/English) narration voice.",
   createdAt: "2026-06-15T09:00:00.000Z",

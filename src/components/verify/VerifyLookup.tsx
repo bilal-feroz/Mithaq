@@ -28,7 +28,11 @@ export function VerifyLookup() {
           placeholder="e.g. 3fK9…  or a full /verify link"
           className="field forensic flex-1"
         />
-        <button type="submit" className="action-primary shrink-0 px-4" aria-label="Verify">
+        <button
+          type="submit"
+          className="action-primary shrink-0 px-4"
+          aria-label="Verify"
+        >
           <ArrowRight className="h-4 w-4" aria-hidden />
         </button>
       </div>

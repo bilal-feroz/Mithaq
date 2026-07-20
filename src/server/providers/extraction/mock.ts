@@ -6,7 +6,10 @@
  * adapters: it never invents permission, and everything it cannot establish
  * is reported as missing or ambiguous for the owner to resolve.
  */
-import { extractionResultSchema, type ExtractionResult } from "@/domain/schemas";
+import {
+  extractionResultSchema,
+  type ExtractionResult,
+} from "@/domain/schemas";
 import type { Language, Platform, Purpose } from "@/domain/types";
 import type { ConsentExtractionAdapter } from "./types";
 
@@ -26,11 +29,13 @@ export class MockExtractionAdapter implements ConsentExtractionAdapter {
       const match = input.consentText.match(
         /(?:^|\.\s+)?([A-Z][\w&'-]*(?:\s+[A-Z][\w&'-]*){0,3})\s+may\s+use\s+my/,
       );
-      if (match?.[1] && !/^i\b/i.test(match[1])) organizations.push(match[1].trim());
+      if (match?.[1] && !/^i\b/i.test(match[1]))
+        organizations.push(match[1].trim());
     }
 
     const purposes: Purpose[] = [];
-    if (/promot|promotion|marketing|brand/.test(text)) purposes.push("brand_promotion");
+    if (/promot|promotion|marketing|brand/.test(text))
+      purposes.push("brand_promotion");
     if (/educat/.test(text)) purposes.push("education");
     if (/internal\s+training/.test(text)) purposes.push("internal_training");
     if (/entertain/.test(text)) purposes.push("entertainment");
@@ -50,7 +55,8 @@ export class MockExtractionAdapter implements ConsentExtractionAdapter {
     if (/urdu/.test(text)) languages.push("ur");
 
     const territories: string[] = [];
-    if (/\buae\b|united arab emirates|emirates/.test(text)) territories.push("AE");
+    if (/\buae\b|united arab emirates|emirates/.test(text))
+      territories.push("AE");
     if (/saudi/.test(text)) territories.push("SA");
     if (/kuwait/.test(text)) territories.push("KW");
     if (/qatar/.test(text)) territories.push("QA");
@@ -76,7 +82,9 @@ export class MockExtractionAdapter implements ConsentExtractionAdapter {
       /until\s+([A-Z][a-z]+\s+\d{1,2},?\s+\d{4})/,
     );
     if (untilMatch?.[1]) {
-      const parsed = Date.parse(`${untilMatch[1].replace(",", "")} 23:59:59 UTC`);
+      const parsed = Date.parse(
+        `${untilMatch[1].replace(",", "")} 23:59:59 UTC`,
+      );
       if (!Number.isNaN(parsed)) validUntil = new Date(parsed).toISOString();
     }
 
@@ -86,7 +94,8 @@ export class MockExtractionAdapter implements ConsentExtractionAdapter {
     if (/gambling/.test(text)) prohibitedTopics.push("gambling");
 
     const missingFields: string[] = [];
-    if (organizations.length === 0) missingFields.push("authorizedOrganizations");
+    if (organizations.length === 0)
+      missingFields.push("authorizedOrganizations");
     if (purposes.length === 0) missingFields.push("allowedPurposes");
     if (platforms.length === 0) missingFields.push("allowedPlatforms");
     if (languages.length === 0) missingFields.push("allowedLanguages");

@@ -23,9 +23,24 @@ import { getExtractionAdapter } from "@/server/providers/extraction";
  * biometric verification and is never described as such.
  */
 const CHALLENGE_WORDS = [
-  "obsidian", "harbor", "lantern", "meridian", "juniper", "silver",
-  "archive", "falcon", "compass", "aurora", "granite", "sable",
-  "monsoon", "cedar", "beacon", "quartz", "mirage", "atlas",
+  "obsidian",
+  "harbor",
+  "lantern",
+  "meridian",
+  "juniper",
+  "silver",
+  "archive",
+  "falcon",
+  "compass",
+  "aurora",
+  "granite",
+  "sable",
+  "monsoon",
+  "cedar",
+  "beacon",
+  "quartz",
+  "mirage",
+  "atlas",
 ] as const;
 
 export type ConsentChallenge = {
@@ -110,13 +125,17 @@ export async function approveConsentPolicy(
 
   const voice = await store.getVoice(input.voiceId);
   if (!voice || voice.ownerId !== actor.profileId) {
-    throw new Error("Only the voice owner can approve a consent policy for this voice.");
+    throw new Error(
+      "Only the voice owner can approve a consent policy for this voice.",
+    );
   }
 
   const latest = await store.getLatestPolicyForVoice(input.voiceId);
   const now = new Date().toISOString();
   const version = latest ? latest.version + 1 : 1;
-  const baseId = latest ? latest.id.replace(/-v\d+$/, "") : `policy-${opaqueId(5)}`;
+  const baseId = latest
+    ? latest.id.replace(/-v\d+$/, "")
+    : `policy-${opaqueId(5)}`;
 
   const policy: ConsentPolicy = {
     id: `${baseId}-v${version}`,
@@ -157,7 +176,12 @@ export async function approveConsentPolicy(
     aggregateId: policy.id,
     eventType: "policy.created",
     actorId: actor.profileId,
-    payload: { policyId: policy.id, version, voiceId: policy.voiceId, source: "consent_studio" },
+    payload: {
+      policyId: policy.id,
+      version,
+      voiceId: policy.voiceId,
+      source: "consent_studio",
+    },
     createdAt: now,
   });
   await store.appendAuditEvent({

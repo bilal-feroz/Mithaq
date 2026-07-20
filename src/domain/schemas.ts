@@ -100,7 +100,9 @@ export const generationRequestInputSchema = z.object({
   topicTags: z.array(topicTagSchema).max(10),
 });
 
-export type GenerationRequestInput = z.infer<typeof generationRequestInputSchema>;
+export type GenerationRequestInput = z.infer<
+  typeof generationRequestInputSchema
+>;
 
 export const generationRequestSchema = generationRequestInputSchema.extend({
   id: z.string().min(1),

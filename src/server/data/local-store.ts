@@ -55,7 +55,9 @@ export class LocalStore implements DataStore {
     return this.state.organizations.find((org) => org.id === id) ?? null;
   }
 
-  async getOrganizationForProfile(profileId: string): Promise<Organization | null> {
+  async getOrganizationForProfile(
+    profileId: string,
+  ): Promise<Organization | null> {
     const membership = this.state.organizationMembers.find(
       (member) => member.profileId === profileId,
     );
@@ -82,10 +84,14 @@ export class LocalStore implements DataStore {
   // ── consent policies ─────────────────────────────────────────────────
 
   async getPolicy(id: string): Promise<ConsentPolicy | null> {
-    return this.state.consentPolicies.find((policy) => policy.id === id) ?? null;
+    return (
+      this.state.consentPolicies.find((policy) => policy.id === id) ?? null
+    );
   }
 
-  async getLatestPolicyForVoice(voiceId: string): Promise<ConsentPolicy | null> {
+  async getLatestPolicyForVoice(
+    voiceId: string,
+  ): Promise<ConsentPolicy | null> {
     const versions = await this.listPolicyVersionsForVoice(voiceId);
     return versions.at(-1) ?? null;
   }
@@ -127,7 +133,9 @@ export class LocalStore implements DataStore {
     grantId: string | null,
     updatedAt: string,
   ): Promise<ConsentPolicy> {
-    const policy = this.state.consentPolicies.find((entry) => entry.id === policyId);
+    const policy = this.state.consentPolicies.find(
+      (entry) => entry.id === policyId,
+    );
     if (!policy) throw new Error(`Policy not found: ${policyId}`);
     if (grantId) {
       const grant = policy.grants.find((entry) => entry.id === grantId);
@@ -146,8 +154,13 @@ export class LocalStore implements DataStore {
     return structuredClone(policy);
   }
 
-  async revokePolicy(policyId: string, revokedAt: string): Promise<ConsentPolicy> {
-    const policy = this.state.consentPolicies.find((entry) => entry.id === policyId);
+  async revokePolicy(
+    policyId: string,
+    revokedAt: string,
+  ): Promise<ConsentPolicy> {
+    const policy = this.state.consentPolicies.find(
+      (entry) => entry.id === policyId,
+    );
     if (!policy) throw new Error(`Policy not found: ${policyId}`);
     if (policy.status === "revoked") return structuredClone(policy);
     policy.status = "revoked";
@@ -163,7 +176,9 @@ export class LocalStore implements DataStore {
   }
 
   async getRequest(id: string): Promise<GenerationRequest | null> {
-    const found = this.state.generationRequests.find((request) => request.id === id);
+    const found = this.state.generationRequests.find(
+      (request) => request.id === id,
+    );
     return found ? structuredClone(found) : null;
   }
 
@@ -172,7 +187,9 @@ export class LocalStore implements DataStore {
     status: RequestStatus,
     updatedAt: string,
   ): Promise<void> {
-    const request = this.state.generationRequests.find((entry) => entry.id === id);
+    const request = this.state.generationRequests.find(
+      (entry) => entry.id === id,
+    );
     if (!request) throw new Error(`Request not found: ${id}`);
     request.status = status;
     request.updatedAt = updatedAt;
@@ -204,11 +221,15 @@ export class LocalStore implements DataStore {
   }
 
   async getDecision(id: string): Promise<StoredDecision | null> {
-    const found = this.state.policyDecisions.find((decision) => decision.id === id);
+    const found = this.state.policyDecisions.find(
+      (decision) => decision.id === id,
+    );
     return found ? structuredClone(found) : null;
   }
 
-  async getLatestDecisionForRequest(requestId: string): Promise<StoredDecision | null> {
+  async getLatestDecisionForRequest(
+    requestId: string,
+  ): Promise<StoredDecision | null> {
     const all = await this.listDecisionsForRequest(requestId);
     return all.at(-1) ?? null;
   }
@@ -231,7 +252,10 @@ export class LocalStore implements DataStore {
     return found ? structuredClone(found) : null;
   }
 
-  async consumeToken(jti: string, consumedAt: string): Promise<TokenConsumeResult> {
+  async consumeToken(
+    jti: string,
+    consumedAt: string,
+  ): Promise<TokenConsumeResult> {
     const record = this.state.decisionTokens.find((token) => token.jti === jti);
     if (!record) {
       return { ok: false, reason: "TOKEN_UNKNOWN", record: null };
@@ -240,7 +264,8 @@ export class LocalStore implements DataStore {
       // Replay or already-invalidated token.
       return {
         ok: false,
-        reason: record.status === "consumed" ? "TOKEN_REPLAYED" : "TOKEN_INVALIDATED",
+        reason:
+          record.status === "consumed" ? "TOKEN_REPLAYED" : "TOKEN_INVALIDATED",
         record: structuredClone(record),
       };
     }
@@ -258,7 +283,9 @@ export class LocalStore implements DataStore {
     }
   }
 
-  async listTokensForRequest(requestId: string): Promise<DecisionTokenRecord[]> {
+  async listTokensForRequest(
+    requestId: string,
+  ): Promise<DecisionTokenRecord[]> {
     return this.state.decisionTokens
       .filter((token) => token.requestId === requestId)
       .sort((a, b) => a.mintedAt.localeCompare(b.mintedAt))
@@ -307,12 +334,15 @@ export class LocalStore implements DataStore {
     requestId: string,
   ): Promise<AmendmentRequest | null> {
     const found = this.state.amendmentRequests.find(
-      (amendment) => amendment.requestId === requestId && amendment.status === "pending",
+      (amendment) =>
+        amendment.requestId === requestId && amendment.status === "pending",
     );
     return found ? structuredClone(found) : null;
   }
 
-  async listAmendmentsForRequest(requestId: string): Promise<AmendmentRequest[]> {
+  async listAmendmentsForRequest(
+    requestId: string,
+  ): Promise<AmendmentRequest[]> {
     return this.state.amendmentRequests
       .filter((amendment) => amendment.requestId === requestId)
       .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
@@ -351,7 +381,9 @@ export class LocalStore implements DataStore {
     return found ? structuredClone(found) : null;
   }
 
-  async listAssetsForOrganization(organizationId: string): Promise<GeneratedAsset[]> {
+  async listAssetsForOrganization(
+    organizationId: string,
+  ): Promise<GeneratedAsset[]> {
     return this.state.generatedAssets
       .filter((asset) => asset.organizationId === organizationId)
       .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
@@ -391,7 +423,9 @@ export class LocalStore implements DataStore {
   }
 
   async listAuditEvents(limit?: number): Promise<AuditEvent[]> {
-    const events = this.state.auditEvents.map((event) => structuredClone(event));
+    const events = this.state.auditEvents.map((event) =>
+      structuredClone(event),
+    );
     if (limit && limit > 0) return events.slice(-limit);
     return events;
   }
@@ -403,7 +437,8 @@ export class LocalStore implements DataStore {
     return this.state.auditEvents
       .filter(
         (event) =>
-          event.aggregateType === aggregateType && event.aggregateId === aggregateId,
+          event.aggregateType === aggregateType &&
+          event.aggregateId === aggregateId,
       )
       .map((event) => structuredClone(event));
   }

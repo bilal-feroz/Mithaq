@@ -3,11 +3,11 @@
  * Server-side seed/fixtures build on these in fixtures.ts.
  */
 export const DEMO_IDS = {
-  owner: "owner-awaiz",
+  owner: "owner-umar",
   requester: "requester-bilal",
   organization: "org-kanban",
-  voice: "voice-awaiz-demo",
-  policyV1: "policy-awaiz-v1",
+  voice: "voice-umar-demo",
+  policyV1: "policy-umar-v1",
 } as const;
 
 export const DEMO_CONSENT_STATEMENT =

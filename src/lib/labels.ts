@@ -50,9 +50,7 @@ export const TERRITORY_OPTIONS: { code: string; label: string }[] = [
 ];
 
 export function territoryLabel(code: string): string {
-  return (
-    TERRITORY_OPTIONS.find((entry) => entry.code === code)?.label ?? code
-  );
+  return TERRITORY_OPTIONS.find((entry) => entry.code === code)?.label ?? code;
 }
 
 export function reasonCodeMessage(code: string): string {

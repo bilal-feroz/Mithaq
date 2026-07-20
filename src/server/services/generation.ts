@@ -45,7 +45,8 @@ export async function generateAssetForRequest(
   const provider = getVoiceProvider();
 
   const request = await store.getRequest(requestId);
-  if (!request) throw new GenerationDeniedError("REQUEST_NOT_FOUND", "Request not found.");
+  if (!request)
+    throw new GenerationDeniedError("REQUEST_NOT_FOUND", "Request not found.");
   if (request.organizationId !== actor.organizationId) {
     throw new GenerationDeniedError(
       "NOT_AUTHORIZED",
@@ -151,9 +152,17 @@ export async function redeemDecisionToken(
   };
 
   // 1. Signature + temporal validity. Never log or expose the full token.
-  const verification = verifyDecisionToken(token, env.decisionTokenSecret, nowEpochSeconds);
+  const verification = verifyDecisionToken(
+    token,
+    env.decisionTokenSecret,
+    nowEpochSeconds,
+  );
   if (!verification.ok) {
-    throw await deny(null, verification.reason, "The authorization token is invalid or expired.");
+    throw await deny(
+      null,
+      verification.reason,
+      "The authorization token is invalid or expired.",
+    );
   }
   const claims = verification.claims;
 
@@ -163,7 +172,11 @@ export async function redeemDecisionToken(
   const decision = await store.getDecision(claims.decisionId);
   const request = await store.getRequest(claims.requestId);
   if (!decision || !request || decision.outcome !== "approved") {
-    throw await deny(claims.jti, "TOKEN_DECISION_MISMATCH", "The token does not match an approved decision.");
+    throw await deny(
+      claims.jti,
+      "TOKEN_DECISION_MISMATCH",
+      "The token does not match an approved decision.",
+    );
   }
   const mismatch = findBindingMismatch(claims, {
     decisionId: decision.id,
@@ -177,35 +190,67 @@ export async function redeemDecisionToken(
     model: provider.model,
   });
   if (mismatch) {
-    throw await deny(claims.jti, mismatch, "The token is not bound to this exact request.");
+    throw await deny(
+      claims.jti,
+      mismatch,
+      "The token is not bound to this exact request.",
+    );
   }
 
   // 3. CURRENT policy status recheck: a token minted before a revocation is
   //    rejected here, unused.
   const currentPolicy = await store.getLatestPolicyForVoice(claims.voiceId);
   if (!currentPolicy || currentPolicy.id !== claims.policyId) {
-    throw await deny(claims.jti, "POLICY_SUPERSEDED", "A newer policy version exists. Re-run the evaluation.");
+    throw await deny(
+      claims.jti,
+      "POLICY_SUPERSEDED",
+      "A newer policy version exists. Re-run the evaluation.",
+    );
   }
   if (currentPolicy.status === "revoked") {
-    throw await deny(claims.jti, "POLICY_REVOKED", "The owner revoked this consent policy after the token was issued.");
+    throw await deny(
+      claims.jti,
+      "POLICY_REVOKED",
+      "The owner revoked this consent policy after the token was issued.",
+    );
   }
   if (currentPolicy.status !== "active") {
-    throw await deny(claims.jti, "POLICY_NOT_ACTIVE", `The consent policy is ${currentPolicy.status}.`);
+    throw await deny(
+      claims.jti,
+      "POLICY_NOT_ACTIVE",
+      `The consent policy is ${currentPolicy.status}.`,
+    );
   }
   if (Date.parse(currentPolicy.validUntil) < Date.parse(nowIso)) {
-    throw await deny(claims.jti, "POLICY_EXPIRED", "The consent policy has expired.");
+    throw await deny(
+      claims.jti,
+      "POLICY_EXPIRED",
+      "The consent policy has expired.",
+    );
   }
   const grant = decision.matchedGrantId
     ? currentPolicy.grants.find((entry) => entry.id === decision.matchedGrantId)
     : null;
   if (decision.matchedGrantId && !grant) {
-    throw await deny(claims.jti, "GRANT_NOT_FOUND", "The amendment grant backing this decision no longer exists.");
+    throw await deny(
+      claims.jti,
+      "GRANT_NOT_FOUND",
+      "The amendment grant backing this decision no longer exists.",
+    );
   }
   if (grant && grant.assetsUsed >= grant.maximumAssets) {
-    throw await deny(claims.jti, "USAGE_LIMIT_REACHED", "The amendment grant allowance is exhausted.");
+    throw await deny(
+      claims.jti,
+      "USAGE_LIMIT_REACHED",
+      "The amendment grant allowance is exhausted.",
+    );
   }
   if (!grant && currentPolicy.assetsUsed >= currentPolicy.maximumAssets) {
-    throw await deny(claims.jti, "USAGE_LIMIT_REACHED", "The authorized usage allowance is exhausted.");
+    throw await deny(
+      claims.jti,
+      "USAGE_LIMIT_REACHED",
+      "The authorized usage allowance is exhausted.",
+    );
   }
 
   // 4. Atomic single-use consumption — replay attempts fail here.
@@ -228,7 +273,11 @@ export async function redeemDecisionToken(
   await store.updateRequestStatus(request.id, "generating", nowIso);
 
   // 5. Provider call — the only place the provider is ever invoked.
-  let generated: { audioBuffer: Buffer; mimeType: string; providerAssetId?: string };
+  let generated: {
+    audioBuffer: Buffer;
+    mimeType: string;
+    providerAssetId?: string;
+  };
   try {
     generated = await provider.generate({
       voiceId: request.voiceId,
@@ -237,16 +286,27 @@ export async function redeemDecisionToken(
       model: claims.model,
     });
   } catch (error) {
-    await store.updateRequestStatus(request.id, "failed", new Date().toISOString());
+    await store.updateRequestStatus(
+      request.id,
+      "failed",
+      new Date().toISOString(),
+    );
     await store.appendAuditEvent({
       aggregateType: "generation_request",
       aggregateId: request.id,
       eventType: "generation.failed",
       actorId: actorProfileId,
-      payload: { requestId: request.id, provider: provider.name, error: String(error).slice(0, 300) },
+      payload: {
+        requestId: request.id,
+        provider: provider.name,
+        error: String(error).slice(0, 300),
+      },
       createdAt: new Date().toISOString(),
     });
-    throw new GenerationDeniedError("PROVIDER_ERROR", "The voice provider failed to generate audio.");
+    throw new GenerationDeniedError(
+      "PROVIDER_ERROR",
+      "The voice provider failed to generate audio.",
+    );
   }
 
   // 6. Register the asset: hash, store, bind to decision + policy version,
@@ -270,7 +330,11 @@ export async function redeemDecisionToken(
     createdAt: completedAt,
   };
   await store.insertAsset(asset, generated.audioBuffer);
-  await store.incrementPolicyUsage(decision.policyId, decision.matchedGrantId, completedAt);
+  await store.incrementPolicyUsage(
+    decision.policyId,
+    decision.matchedGrantId,
+    completedAt,
+  );
   await store.updateRequestStatus(request.id, "generated", completedAt);
 
   await store.appendAuditEvent({
@@ -278,7 +342,11 @@ export async function redeemDecisionToken(
     aggregateId: claims.jti,
     eventType: "token.consumed",
     actorId: actorProfileId,
-    payload: { jti: claims.jti, decisionId: decision.id, requestId: request.id },
+    payload: {
+      jti: claims.jti,
+      decisionId: decision.id,
+      requestId: request.id,
+    },
     createdAt: completedAt,
   });
   await store.appendAuditEvent({

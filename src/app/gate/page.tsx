@@ -27,14 +27,20 @@ export default async function GatePage({
   const owner = voice ? await store.getProfile(voice.ownerId) : null;
 
   const request = requestId ? await store.getRequest(requestId) : null;
-  const decision = request ? await store.getLatestDecisionForRequest(request.id) : null;
-  const decisions = request ? await store.listDecisionsForRequest(request.id) : [];
+  const decision = request
+    ? await store.getLatestDecisionForRequest(request.id)
+    : null;
+  const decisions = request
+    ? await store.listDecisionsForRequest(request.id)
+    : [];
   const asset = request ? await store.getAssetForRequest(request.id) : null;
   const tokens = request ? await store.listTokensForRequest(request.id) : [];
   const pendingAmendment = request
     ? await store.getPendingAmendmentForRequest(request.id)
     : null;
-  const amendments = request ? await store.listAmendmentsForRequest(request.id) : [];
+  const amendments = request
+    ? await store.listAmendmentsForRequest(request.id)
+    : [];
 
   return (
     <div>
@@ -47,8 +53,8 @@ export default async function GatePage({
             </h1>
             <p className="mt-1.5 max-w-[52ch] text-[13.5px] text-text-secondary">
               Submit a voice-generation request. Every clause of{" "}
-              {owner?.displayName ?? "the owner"}&apos;s consent policy is evaluated by
-              the deterministic engine — the model never decides.
+              {owner?.displayName ?? "the owner"}&apos;s consent policy is
+              evaluated by the deterministic engine — the model never decides.
             </p>
           </div>
         </div>
@@ -56,18 +62,31 @@ export default async function GatePage({
 
       {session.role !== "requester" && (
         <RoleNotice
-          message="You are viewing as Awaiz (voice owner). Requests are submitted by the requester persona."
+          message="You are viewing as Umar (voice owner). Requests are submitted by the requester persona."
           targetRole="requester"
           targetLabel="Switch to Bilal — requester"
         />
       )}
 
+      {/* When a decision exists it is the mobile focal point: decision first,
+          form second; the desktop grid keeps form left, decision right. */}
       <div className="mt-7 grid items-start gap-6 lg:grid-cols-12">
-        <Reveal delay={0.06} className="lg:col-span-5">
+        <Reveal
+          delay={0.06}
+          className={
+            request && decision
+              ? "order-2 lg:order-1 lg:col-span-5"
+              : "lg:col-span-5"
+          }
+        >
           <GateForm
             voice={
               voice && owner
-                ? { id: voice.id, name: voice.displayName, owner: owner.displayName }
+                ? {
+                    id: voice.id,
+                    name: voice.displayName,
+                    owner: owner.displayName,
+                  }
                 : null
             }
             hasActivePolicy={Boolean(policy)}
@@ -75,7 +94,13 @@ export default async function GatePage({
           />
         </Reveal>
 
-        <div className="lg:col-span-7">
+        <div
+          className={
+            request && decision
+              ? "order-1 lg:order-2 lg:col-span-7"
+              : "lg:col-span-7"
+          }
+        >
           {request && decision ? (
             <DecisionSurface
               request={request}

@@ -31,11 +31,13 @@ function buildGrant(overrides: Partial<PolicyGrant> = {}): PolicyGrant {
   };
 }
 
-function buildPolicyV2WithGrant(grant: PolicyGrant = buildGrant()): ConsentPolicy {
+function buildPolicyV2WithGrant(
+  grant: PolicyGrant = buildGrant(),
+): ConsentPolicy {
   const v1 = buildDemoPolicyV1();
   return {
     ...v1,
-    id: "policy-awaiz-v2",
+    id: "policy-umar-v2",
     version: 2,
     supersedesPolicyId: v1.id,
     grants: [grant],
@@ -50,7 +52,9 @@ describe("policy engine — approvals", () => {
       evaluatedAt: FIXED_NOW,
     });
     expect(decision.outcome).toBe("approved");
-    expect(decision.clauses.every((clause) => clause.status === "passed")).toBe(true);
+    expect(decision.clauses.every((clause) => clause.status === "passed")).toBe(
+      true,
+    );
     expect(decision.policyVersion).toBe(1);
     expect(decision.matchedGrantId).toBeNull();
   });
@@ -129,7 +133,9 @@ describe("policy engine — clause failures", () => {
     });
     expect(decision.outcome).toBe("blocked");
     expect(failedCodes(decision)).toEqual(["PAID_ADVERTISING_PROHIBITED"]);
-    const clause = decision.clauses.find((c) => c.code === "PAID_ADVERTISING_PROHIBITED");
+    const clause = decision.clauses.find(
+      (c) => c.code === "PAID_ADVERTISING_PROHIBITED",
+    );
     expect(clause?.suggestedRemedy).toMatch(/organic/i);
   });
 
@@ -176,10 +182,14 @@ describe("policy engine — clause failures", () => {
   it("blocks a publication date outside the consent window", () => {
     const decision = evaluatePolicy({
       policy: buildDemoPolicyV1(),
-      request: buildCompliantRequest({ publicationDate: "2026-08-15T09:00:00.000Z" }),
+      request: buildCompliantRequest({
+        publicationDate: "2026-08-15T09:00:00.000Z",
+      }),
       evaluatedAt: FIXED_NOW,
     });
-    expect(failedCodes(decision)).toContain("PUBLICATION_DATE_OUTSIDE_VALIDITY");
+    expect(failedCodes(decision)).toContain(
+      "PUBLICATION_DATE_OUTSIDE_VALIDITY",
+    );
   });
 });
 
@@ -241,7 +251,9 @@ describe("policy engine — policy lifecycle states", () => {
   it("blocks requests before validFrom", () => {
     const decision = evaluatePolicy({
       policy: buildDemoPolicyV1(),
-      request: buildCompliantRequest({ publicationDate: "2026-07-05T00:00:00.000Z" }),
+      request: buildCompliantRequest({
+        publicationDate: "2026-07-05T00:00:00.000Z",
+      }),
       evaluatedAt: "2026-06-20T00:00:00.000Z",
     });
     expect(failedCodes(decision)).toContain("POLICY_NOT_YET_ACTIVE");
@@ -303,7 +315,10 @@ describe("policy engine — amendment grants (narrow exceptions)", () => {
   it("keeps blocking a paid request on a platform outside the grant", () => {
     const decision = evaluatePolicy({
       policy: buildPolicyV2WithGrant(),
-      request: buildCompliantRequest({ placement: "paid", platform: "youtube" }),
+      request: buildCompliantRequest({
+        placement: "paid",
+        platform: "youtube",
+      }),
       evaluatedAt: FIXED_NOW,
     });
     expect(failedCodes(decision)).toEqual(["PAID_ADVERTISING_PROHIBITED"]);
@@ -397,7 +412,11 @@ describe("script hashing", () => {
   });
 
   it("request fixtures carry the hash of their script", () => {
-    const request = buildCompliantRequest({ script: "A brand new script for the demo." });
-    expect(request.scriptHash).toEqual(hashScript("A brand new script for the demo."));
+    const request = buildCompliantRequest({
+      script: "A brand new script for the demo.",
+    });
+    expect(request.scriptHash).toEqual(
+      hashScript("A brand new script for the demo."),
+    );
   });
 });

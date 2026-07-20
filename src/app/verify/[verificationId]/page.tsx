@@ -1,7 +1,14 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Check, Clock3, ShieldCheck, ShieldOff, X } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  Clock3,
+  ShieldCheck,
+  ShieldOff,
+  X,
+} from "lucide-react";
 import { getPublicVerification } from "@/server/services/verification";
 import {
   LANGUAGE_LABELS,
@@ -92,7 +99,10 @@ export default async function VerificationPage({
           data-testid="verification-status"
           data-status={verification.status}
           aria-live="polite"
-          className={cn("glass-strong light-sweep p-7 text-center md:p-9", config.halo)}
+          className={cn(
+            "glass-strong light-sweep p-7 text-center md:p-9",
+            config.halo,
+          )}
         >
           <span
             aria-hidden
@@ -105,7 +115,10 @@ export default async function VerificationPage({
                   : "border-warning/45 bg-warning-soft",
             )}
           >
-            <StatusIcon className={cn("h-8 w-8", config.text)} strokeWidth={1.7} />
+            <StatusIcon
+              className={cn("h-8 w-8", config.text)}
+              strokeWidth={1.7}
+            />
           </span>
           <h1
             className={cn(
@@ -119,11 +132,17 @@ export default async function VerificationPage({
             {verification.statusDetail}
           </p>
           <div className="mt-5 flex flex-wrap items-center justify-center gap-2">
-            <span className={cn("rounded-full border px-3 py-1 text-[11.5px] font-semibold", config.chip)}>
+            <span
+              className={cn(
+                "rounded-full border px-3 py-1 text-[11.5px] font-semibold",
+                config.chip,
+              )}
+            >
               policy v{verification.policyVersionUsed} at approval
             </span>
             <span className="rounded-full border border-border-glass bg-white/[0.04] px-3 py-1 text-[11.5px] font-medium text-text-secondary">
-              current: v{verification.currentPolicyVersion} · {verification.currentPolicyStatus}
+              current: v{verification.currentPolicyVersion} ·{" "}
+              {verification.currentPolicyStatus}
             </span>
           </div>
         </section>
@@ -131,27 +150,43 @@ export default async function VerificationPage({
 
       {/* facts */}
       <Reveal delay={0.12} className="mt-5">
-        <section className="glass-panel p-6 md:p-7" aria-label="Registered facts">
+        <section
+          className="glass-panel p-6 md:p-7"
+          aria-label="Registered facts"
+        >
           <div className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
             <Fact label="Voice owner" value={verification.ownerDisplayName} />
             <Fact label="Voice" value={verification.voiceDisplayName} />
-            <Fact label="Authorized organization" value={verification.organizationName} />
+            <Fact
+              label="Authorized organization"
+              value={verification.organizationName}
+            />
             <Fact
               label="Purpose"
-              value={PURPOSE_LABELS[verification.purpose as Purpose] ?? verification.purpose}
+              value={
+                PURPOSE_LABELS[verification.purpose as Purpose] ??
+                verification.purpose
+              }
             />
             <Fact
               label="Platform · placement"
               value={`${PLATFORM_LABELS[verification.platform as Platform] ?? verification.platform} · ${
-                PLACEMENT_LABELS[verification.placement as Placement] ?? verification.placement
+                PLACEMENT_LABELS[verification.placement as Placement] ??
+                verification.placement
               }`}
             />
             <Fact
               label="Language · territory"
               value={`${LANGUAGE_LABELS[verification.language as Language] ?? verification.language} · ${territoryLabel(verification.territory)}`}
             />
-            <Fact label="Approved" value={formatUtcDateTime(verification.approvedAt)} />
-            <Fact label="Generated" value={formatUtcDateTime(verification.generatedAt)} />
+            <Fact
+              label="Approved"
+              value={formatUtcDateTime(verification.approvedAt)}
+            />
+            <Fact
+              label="Generated"
+              value={formatUtcDateTime(verification.generatedAt)}
+            />
           </div>
 
           <div className="mt-6 border-t border-border-glass pt-5">
@@ -160,8 +195,11 @@ export default async function VerificationPage({
               sha256:{verification.assetSha256}
             </p>
             <p className="mt-1.5 text-[11.5px] text-text-muted">
-              {formatBytes(verification.assetByteLength)} · {verification.assetMimeType} ·
-              provider: {verification.provider === "mock" ? "demo provider" : verification.provider}
+              {formatBytes(verification.assetByteLength)} ·{" "}
+              {verification.assetMimeType} · provider:{" "}
+              {verification.provider === "mock"
+                ? "demo provider"
+                : verification.provider}
             </p>
           </div>
 
@@ -170,15 +208,27 @@ export default async function VerificationPage({
               <SecurityLabel>Decision trail</SecurityLabel>
               <p className="mt-2 text-[12.5px] text-text-secondary">
                 {passedCount} of {verification.decisionTrail.length} conditions
-                passed at approval under policy v{verification.policyVersionUsed}.
+                passed at approval under policy v
+                {verification.policyVersionUsed}.
               </p>
               <ul className="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
                 {verification.decisionTrail.map((clause) => (
-                  <li key={clause.clause} className="flex items-center gap-2 text-[12px] text-text-secondary">
+                  <li
+                    key={clause.clause}
+                    className="flex items-center gap-2 text-[12px] text-text-secondary"
+                  >
                     {clause.status === "passed" ? (
-                      <Check className="h-3.5 w-3.5 shrink-0 text-approved" strokeWidth={2.4} aria-hidden />
+                      <Check
+                        className="h-3.5 w-3.5 shrink-0 text-approved"
+                        strokeWidth={2.4}
+                        aria-hidden
+                      />
                     ) : (
-                      <X className="h-3.5 w-3.5 shrink-0 text-blocked" strokeWidth={2.4} aria-hidden />
+                      <X
+                        className="h-3.5 w-3.5 shrink-0 text-blocked"
+                        strokeWidth={2.4}
+                        aria-hidden
+                      />
                     )}
                     {clause.clause}
                     <span className="sr-only">{clause.status}</span>

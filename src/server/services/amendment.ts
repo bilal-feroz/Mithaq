@@ -45,12 +45,16 @@ export async function draftAmendmentForRequest(
   }
   const decision = await store.getLatestDecisionForRequest(requestId);
   if (!decision || decision.outcome !== "blocked") {
-    throw new Error("Only a blocked request can produce an amendment proposal.");
+    throw new Error(
+      "Only a blocked request can produce an amendment proposal.",
+    );
   }
   const policy = await store.getPolicy(decision.policyId);
   if (!policy) throw new Error("The evaluated policy no longer exists.");
 
-  const failedClauses = decision.clauses.filter((clause) => clause.status === "failed");
+  const failedClauses = decision.clauses.filter(
+    (clause) => clause.status === "failed",
+  );
   const failedCodes = failedClauses.map((clause) => clause.code);
   const amendable = failedCodes.every((code) =>
     ["PAID_ADVERTISING_PROHIBITED", "USAGE_LIMIT_REACHED"].includes(code),

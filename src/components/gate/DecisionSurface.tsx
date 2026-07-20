@@ -73,9 +73,11 @@ export function DecisionSurface({
   const failedCodes = failed.map((c) => c.code);
   const revokedNow = failedCodes.includes("POLICY_REVOKED");
   const grantBacked = approved && decision.matchedGrantId !== null;
-  const approvedAmendment = amendments.find((a) => a.status === "approved") ?? null;
+  const approvedAmendment =
+    amendments.find((a) => a.status === "approved") ?? null;
   const onlyPaidFailure =
-    failedCodes.length === 1 && failedCodes[0] === "PAID_ADVERTISING_PROHIBITED";
+    failedCodes.length === 1 &&
+    failedCodes[0] === "PAID_ADVERTISING_PROHIBITED";
   const amendable =
     failed.length > 0 &&
     failedCodes.every((code) =>
@@ -85,7 +87,10 @@ export function DecisionSurface({
     .map((clause) => clause.suggestedRemedy)
     .filter((remedy): remedy is string => Boolean(remedy));
 
-  function run(name: string, fn: () => Promise<{ ok: boolean; error?: string }>) {
+  function run(
+    name: string,
+    fn: () => Promise<{ ok: boolean; error?: string }>,
+  ) {
     setBusy(name);
     setError(null);
     startTransition(async () => {
@@ -128,7 +133,10 @@ export function DecisionSurface({
 
       {/* summary stats */}
       <div className="mt-6 grid grid-cols-2 gap-2.5 md:grid-cols-4">
-        <Stat label="Conditions passed" value={`${passed} of ${decision.clauses.length}`} />
+        <Stat
+          label="Conditions passed"
+          value={`${passed} of ${decision.clauses.length}`}
+        />
         <Stat
           label="Conditions failed"
           value={String(failed.length)}
@@ -169,13 +177,17 @@ export function DecisionSurface({
           </span>
         </div>
         <RevealList className="flex flex-col gap-1" stagger={0.03} delay={0.15}>
-          {[...failed, ...decision.clauses.filter((c) => c.status === "passed")].map(
-            (clause) => (
-              <RevealItem key={clause.clause}>
-                <ClauseResultRow clause={clause} emphasized={clause.status === "failed"} />
-              </RevealItem>
-            ),
-          )}
+          {[
+            ...failed,
+            ...decision.clauses.filter((c) => c.status === "passed"),
+          ].map((clause) => (
+            <RevealItem key={clause.clause}>
+              <ClauseResultRow
+                clause={clause}
+                emphasized={clause.status === "failed"}
+              />
+            </RevealItem>
+          ))}
         </RevealList>
       </div>
 
@@ -187,7 +199,10 @@ export function DecisionSurface({
           </SecurityLabel>
           <ul className="mt-2 flex flex-col gap-1.5">
             {remedies.map((remedy) => (
-              <li key={remedy} className="text-[13px] leading-relaxed text-text-secondary">
+              <li
+                key={remedy}
+                className="text-[13px] leading-relaxed text-text-secondary"
+              >
                 {remedy}
               </li>
             ))}
@@ -197,8 +212,8 @@ export function DecisionSurface({
               data-testid="amendment-pending"
               className="mt-3 rounded-[10px] border border-warning/30 bg-warning-soft px-3 py-2.5 text-[12.5px] font-medium text-warning"
             >
-              Amendment sent to the voice owner — awaiting their decision. Switch
-              to Awaiz to review it.
+              Amendment sent to the voice owner — awaiting their decision.
+              Switch to Umar to review it.
             </p>
           )}
         </div>
@@ -214,9 +229,14 @@ export function DecisionSurface({
 
       {/* generated asset */}
       {asset && (
-        <div className="glass-subtle mt-6 border-approved/25 p-4" data-testid="asset-panel">
+        <div
+          className="glass-subtle mt-6 border-approved/25 p-4"
+          data-testid="asset-panel"
+        >
           <div className="flex flex-wrap items-center justify-between gap-2">
-            <SecurityLabel icon={<FileAudio className="h-3.5 w-3.5" aria-hidden />}>
+            <SecurityLabel
+              icon={<FileAudio className="h-3.5 w-3.5" aria-hidden />}
+            >
               Registered master asset
             </SecurityLabel>
             {mockProvider && (
@@ -262,7 +282,9 @@ export function DecisionSurface({
       {/* token trail */}
       {latestToken && (
         <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-1.5 rounded-[10px] border border-border-glass bg-black/25 px-3.5 py-2.5">
-          <SecurityLabel icon={<KeyRound className="h-3.5 w-3.5" aria-hidden />}>
+          <SecurityLabel
+            icon={<KeyRound className="h-3.5 w-3.5" aria-hidden />}
+          >
             Token {latestToken.status}
           </SecurityLabel>
           <span className="forensic text-[11px] text-text-muted">
@@ -275,7 +297,10 @@ export function DecisionSurface({
       )}
 
       {error && (
-        <p role="alert" className="mt-4 flex items-start gap-2 rounded-[10px] border border-blocked/30 bg-blocked-soft px-3 py-2.5 text-[12.5px] text-blocked">
+        <p
+          role="alert"
+          className="mt-4 flex items-start gap-2 rounded-[10px] border border-blocked/30 bg-blocked-soft px-3 py-2.5 text-[12.5px] text-blocked"
+        >
           <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden />
           {error}
         </p>
@@ -288,7 +313,9 @@ export function DecisionSurface({
             type="button"
             data-testid="generate-voice"
             disabled={isPending}
-            onClick={() => run("generate", () => generateAudioAction(request.id))}
+            onClick={() =>
+              run("generate", () => generateAudioAction(request.id))
+            }
             className="action-primary"
           >
             {busy === "generate" ? (
@@ -313,7 +340,8 @@ export function DecisionSurface({
             onClick={() =>
               run("organic", async () => {
                 const result = await convertToOrganicAction(request.id);
-                if (result.ok) router.push(`/gate?request=${result.data.requestId}`);
+                if (result.ok)
+                  router.push(`/gate?request=${result.data.requestId}`);
                 return result;
               })
             }
@@ -324,18 +352,24 @@ export function DecisionSurface({
           </button>
         )}
 
-        {!approved && amendable && isRequester && !pendingAmendment && !revokedNow && (
-          <button
-            type="button"
-            data-testid="request-amendment"
-            disabled={isPending}
-            onClick={() => run("amend", () => requestAmendmentAction(request.id))}
-            className="action-primary"
-          >
-            <Wand2 className="h-4 w-4" aria-hidden />
-            {busy === "amend" ? "Drafting proposal…" : "Request amendment"}
-          </button>
-        )}
+        {!approved &&
+          amendable &&
+          isRequester &&
+          !pendingAmendment &&
+          !revokedNow && (
+            <button
+              type="button"
+              data-testid="request-amendment"
+              disabled={isPending}
+              onClick={() =>
+                run("amend", () => requestAmendmentAction(request.id))
+              }
+              className="action-primary"
+            >
+              <Wand2 className="h-4 w-4" aria-hidden />
+              {busy === "amend" ? "Drafting proposal…" : "Request amendment"}
+            </button>
+          )}
 
         <button
           type="button"
@@ -344,14 +378,19 @@ export function DecisionSurface({
           onClick={() => run("rerun", () => rerunEvaluationAction(request.id))}
           className="action-quiet"
         >
-          <RefreshCcw className={cn("h-4 w-4", busy === "rerun" && "animate-spin")} aria-hidden />
+          <RefreshCcw
+            className={cn("h-4 w-4", busy === "rerun" && "animate-spin")}
+            aria-hidden
+          />
           Re-run evaluation
         </button>
       </div>
 
       {/* provenance footnote */}
       <div className="mt-6 flex flex-wrap items-center gap-x-5 gap-y-1 border-t border-border-glass pt-4">
-        <SecurityLabel icon={<Fingerprint className="h-3.5 w-3.5" aria-hidden />}>
+        <SecurityLabel
+          icon={<Fingerprint className="h-3.5 w-3.5" aria-hidden />}
+        >
           script hash {shortHash(request.scriptHash, 10)}
         </SecurityLabel>
         <span className="forensic text-[11px] text-text-muted">
@@ -393,7 +432,11 @@ function Stat({
       >
         {value}
       </p>
-      {detail && <p className="forensic mt-0.5 text-[10.5px] text-text-muted">{detail}</p>}
+      {detail && (
+        <p className="forensic mt-0.5 text-[10.5px] text-text-muted">
+          {detail}
+        </p>
+      )}
     </div>
   );
 }

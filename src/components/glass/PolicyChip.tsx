@@ -8,7 +8,8 @@ const TONES: Record<Tone, string> = {
   approved: "border-approved/30 bg-approved-soft text-approved",
   blocked: "border-blocked/30 bg-blocked-soft text-blocked",
   warning: "border-warning/35 bg-warning-soft text-warning",
-  informational: "border-informational/30 bg-informational-soft text-informational",
+  informational:
+    "border-informational/30 bg-informational-soft text-informational",
 };
 
 /** A normalized policy term rendered as an elegant chip. Terms never truncate. */
@@ -52,5 +53,7 @@ export function ChipGroup({
   children: ReactNode;
   className?: string;
 }) {
-  return <div className={cn("flex flex-wrap gap-2", className)}>{children}</div>;
+  return (
+    <div className={cn("flex flex-wrap gap-2", className)}>{children}</div>
+  );
 }

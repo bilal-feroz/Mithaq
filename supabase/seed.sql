@@ -2,7 +2,7 @@
 -- Safe demo-data path: idempotent inserts, demo ids namespaced, no secrets.
 
 insert into public.profiles (id, display_name, role, title) values
-  ('owner-awaiz',     'Awaiz Ahmed', 'owner',     'Voice owner'),
+  ('owner-umar',     'Umar', 'owner',     'Voice owner'),
   ('requester-bilal', 'Bilal',       'requester', 'Producer, Kanban Studios')
 on conflict (id) do nothing;
 
@@ -15,7 +15,7 @@ insert into public.organization_members (organization_id, profile_id) values
 on conflict do nothing;
 
 insert into public.voice_profiles (id, owner_id, display_name, provider_voice_id, description, created_at) values
-  ('voice-awaiz-demo', 'owner-awaiz', 'Awaiz Demo Voice', null,
+  ('voice-umar-demo', 'owner-umar', 'Umar Demo Voice', null,
    'Warm bilingual (Arabic/English) narration voice.', '2026-06-15T09:00:00Z')
 on conflict (id) do nothing;
 
@@ -27,7 +27,7 @@ insert into public.consent_policies (
   grants, source_consent_text, source_consent_language, owner_approved_at,
   supersedes_policy_id, revoked_at, created_at, updated_at
 ) values (
-  'policy-awaiz-v1', 1, 'owner-awaiz', 'voice-awaiz-demo', 'active',
+  'policy-umar-v1', 1, 'owner-umar', 'voice-umar-demo', 'active',
   '{org-kanban}', '{brand_promotion}', '{instagram,youtube}',
   '{ar,en}', '{AE,SA}', 'prohibited', true,
   1, 0, '2026-07-01T00:00:00Z', '2026-07-30T23:59:59Z', '{politics}',

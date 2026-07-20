@@ -50,15 +50,21 @@ export function NavLink({
       <Icon
         className={cn(
           "h-[17px] w-[17px] shrink-0",
-          active ? "text-metal" : "text-text-muted group-hover:text-text-secondary",
+          active
+            ? "text-metal"
+            : "text-text-muted group-hover:text-text-secondary",
         )}
         strokeWidth={1.75}
         aria-hidden
       />
       <span className="min-w-0">
-        <span className="block text-[13.5px] font-medium leading-tight">{label}</span>
+        <span className="block text-[13.5px] font-medium leading-tight">
+          {label}
+        </span>
         {hint && (
-          <span className="block text-[10.5px] leading-tight text-text-muted">{hint}</span>
+          <span className="block text-[10.5px] leading-tight text-text-muted">
+            {hint}
+          </span>
         )}
       </span>
     </Link>

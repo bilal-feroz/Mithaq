@@ -45,7 +45,9 @@ export async function getSession(): Promise<Session> {
   const profile = await store.getProfile(profileId);
   if (!profile) throw new Error("Demo persona missing from store");
   const organization =
-    role === "requester" ? await store.getOrganizationForProfile(profileId) : null;
+    role === "requester"
+      ? await store.getOrganizationForProfile(profileId)
+      : null;
   return { role, profile, organization };
 }
 
@@ -57,7 +59,9 @@ export async function requireOwnerSession(): Promise<Session> {
   return session;
 }
 
-export async function requireRequesterSession(): Promise<Session & { organization: Organization }> {
+export async function requireRequesterSession(): Promise<
+  Session & { organization: Organization }
+> {
   const session = await getSession();
   if (session.role !== "requester" || !session.organization) {
     throw new Error("This action requires the organization-requester role");

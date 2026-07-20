@@ -51,14 +51,20 @@ export class SupabaseStore implements DataStore {
     });
   }
 
-  private async one<T>(query: PromiseLike<{ data: unknown; error: { message: string } | null }>, map: (row: Row) => T): Promise<T | null> {
+  private async one<T>(
+    query: PromiseLike<{ data: unknown; error: { message: string } | null }>,
+    map: (row: Row) => T,
+  ): Promise<T | null> {
     const { data, error } = await query;
     if (error) throw new Error(error.message);
     if (!data) return null;
     return map(data as Row);
   }
 
-  private async many<T>(query: PromiseLike<{ data: unknown; error: { message: string } | null }>, map: (row: Row) => T): Promise<T[]> {
+  private async many<T>(
+    query: PromiseLike<{ data: unknown; error: { message: string } | null }>,
+    map: (row: Row) => T,
+  ): Promise<T[]> {
     const { data, error } = await query;
     if (error) throw new Error(error.message);
     return ((data as Row[]) ?? []).map(map);
@@ -94,10 +100,14 @@ export class SupabaseStore implements DataStore {
     ownerId: r.owner_id as string,
     voiceId: r.voice_id as string,
     status: r.status as ConsentPolicy["status"],
-    authorizedOrganizationIds: (r.authorized_organization_ids as string[]) ?? [],
-    allowedPurposes: (r.allowed_purposes as ConsentPolicy["allowedPurposes"]) ?? [],
-    allowedPlatforms: (r.allowed_platforms as ConsentPolicy["allowedPlatforms"]) ?? [],
-    allowedLanguages: (r.allowed_languages as ConsentPolicy["allowedLanguages"]) ?? [],
+    authorizedOrganizationIds:
+      (r.authorized_organization_ids as string[]) ?? [],
+    allowedPurposes:
+      (r.allowed_purposes as ConsentPolicy["allowedPurposes"]) ?? [],
+    allowedPlatforms:
+      (r.allowed_platforms as ConsentPolicy["allowedPlatforms"]) ?? [],
+    allowedLanguages:
+      (r.allowed_languages as ConsentPolicy["allowedLanguages"]) ?? [],
     allowedTerritories: (r.allowed_territories as string[]) ?? [],
     paidAdvertising: r.paid_advertising as ConsentPolicy["paidAdvertising"],
     editingAllowed: Boolean(r.editing_allowed),
@@ -109,7 +119,8 @@ export class SupabaseStore implements DataStore {
     grants: (r.grants as ConsentPolicy["grants"]) ?? [],
     sourceConsentText: (r.source_consent_text as string) ?? "",
     sourceConsentLanguage:
-      (r.source_consent_language as ConsentPolicy["sourceConsentLanguage"]) ?? "en",
+      (r.source_consent_language as ConsentPolicy["sourceConsentLanguage"]) ??
+      "en",
     ownerApprovedAt: isoOrNull(r.owner_approved_at),
     supersedesPolicyId: (r.supersedes_policy_id as string) ?? null,
     revokedAt: isoOrNull(r.revoked_at),
@@ -255,7 +266,11 @@ export class SupabaseStore implements DataStore {
 
   async getPolicy(id: string) {
     return this.one(
-      this.client.from("consent_policies").select("*").eq("id", id).maybeSingle(),
+      this.client
+        .from("consent_policies")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle(),
       this.mapPolicy,
     );
   }
@@ -321,7 +336,10 @@ export class SupabaseStore implements DataStore {
     };
   }
 
-  async createPolicyVersion(newPolicy: ConsentPolicy, supersededPolicyId: string) {
+  async createPolicyVersion(
+    newPolicy: ConsentPolicy,
+    supersededPolicyId: string,
+  ) {
     const { error } = await this.client.rpc("create_policy_version", {
       p_superseded_id: supersededPolicyId,
       p_new_policy: newPolicy,
@@ -329,7 +347,11 @@ export class SupabaseStore implements DataStore {
     if (error) throw new Error(error.message);
   }
 
-  async incrementPolicyUsage(policyId: string, grantId: string | null, updatedAt: string) {
+  async incrementPolicyUsage(
+    policyId: string,
+    grantId: string | null,
+    updatedAt: string,
+  ) {
     const { error } = await this.client.rpc("increment_policy_usage", {
       p_policy_id: policyId,
       p_grant_id: grantId,
@@ -344,7 +366,11 @@ export class SupabaseStore implements DataStore {
   async revokePolicy(policyId: string, revokedAt: string) {
     const { error } = await this.client
       .from("consent_policies")
-      .update({ status: "revoked", revoked_at: revokedAt, updated_at: revokedAt })
+      .update({
+        status: "revoked",
+        revoked_at: revokedAt,
+        updated_at: revokedAt,
+      })
       .eq("id", policyId)
       .neq("status", "revoked");
     if (error) throw new Error(error.message);
@@ -380,12 +406,20 @@ export class SupabaseStore implements DataStore {
 
   async getRequest(id: string) {
     return this.one(
-      this.client.from("generation_requests").select("*").eq("id", id).maybeSingle(),
+      this.client
+        .from("generation_requests")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle(),
       this.mapRequest,
     );
   }
 
-  async updateRequestStatus(id: string, status: RequestStatus, updatedAt: string) {
+  async updateRequestStatus(
+    id: string,
+    status: RequestStatus,
+    updatedAt: string,
+  ) {
     const { error } = await this.client
       .from("generation_requests")
       .update({ status, updated_at: updatedAt })
@@ -465,7 +499,9 @@ export class SupabaseStore implements DataStore {
         ...(r.expected !== null ? { expected: r.expected } : {}),
         ...(r.received !== null ? { received: r.received } : {}),
         explanation: r.explanation as string,
-        ...(r.suggested_remedy ? { suggestedRemedy: r.suggested_remedy as string } : {}),
+        ...(r.suggested_remedy
+          ? { suggestedRemedy: r.suggested_remedy as string }
+          : {}),
       }),
     );
     return {
@@ -483,7 +519,11 @@ export class SupabaseStore implements DataStore {
 
   async getDecision(id: string) {
     const row = await this.one(
-      this.client.from("policy_decisions").select("*").eq("id", id).maybeSingle(),
+      this.client
+        .from("policy_decisions")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle(),
       (r) => r,
     );
     return row ? this.attachClauses(row) : null;
@@ -534,12 +574,19 @@ export class SupabaseStore implements DataStore {
 
   async getTokenRecord(jti: string) {
     return this.one(
-      this.client.from("decision_tokens").select("*").eq("jti", jti).maybeSingle(),
+      this.client
+        .from("decision_tokens")
+        .select("*")
+        .eq("jti", jti)
+        .maybeSingle(),
       this.mapToken,
     );
   }
 
-  async consumeToken(jti: string, consumedAt: string): Promise<TokenConsumeResult> {
+  async consumeToken(
+    jti: string,
+    consumedAt: string,
+  ): Promise<TokenConsumeResult> {
     const { data, error } = await this.client.rpc("consume_decision_token", {
       p_jti: jti,
       p_consumed_at: consumedAt,
@@ -616,7 +663,11 @@ export class SupabaseStore implements DataStore {
 
   async getAmendment(id: string) {
     return this.one(
-      this.client.from("amendment_requests").select("*").eq("id", id).maybeSingle(),
+      this.client
+        .from("amendment_requests")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle(),
       this.mapAmendment,
     );
   }
@@ -678,7 +729,10 @@ export class SupabaseStore implements DataStore {
     const storagePath = `${asset.id}`;
     const { error: uploadError } = await this.client.storage
       .from(ASSET_BUCKET)
-      .upload(storagePath, bytes, { contentType: asset.mimeType, upsert: false });
+      .upload(storagePath, bytes, {
+        contentType: asset.mimeType,
+        upsert: false,
+      });
     if (uploadError) throw new Error(uploadError.message);
 
     const { error } = await this.client.from("generated_assets").insert({
@@ -703,7 +757,11 @@ export class SupabaseStore implements DataStore {
 
   async getAsset(id: string) {
     return this.one(
-      this.client.from("generated_assets").select("*").eq("id", id).maybeSingle(),
+      this.client
+        .from("generated_assets")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle(),
       this.mapAsset,
     );
   }
@@ -827,7 +885,10 @@ export class SupabaseStore implements DataStore {
     return rows;
   }
 
-  async listAuditEventsForAggregate(aggregateType: string, aggregateId: string) {
+  async listAuditEventsForAggregate(
+    aggregateType: string,
+    aggregateId: string,
+  ) {
     return this.many(
       this.client
         .from("audit_events")

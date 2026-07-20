@@ -52,11 +52,18 @@ export function buildClaims(input: {
 }
 
 function sign(payloadB64: string, secret: string): Buffer {
-  return createHmac("sha256", secret).update(`${TOKEN_PREFIX}.${payloadB64}`).digest();
+  return createHmac("sha256", secret)
+    .update(`${TOKEN_PREFIX}.${payloadB64}`)
+    .digest();
 }
 
-export function mintDecisionToken(claims: DecisionTokenClaims, secret: string): string {
-  const payloadB64 = Buffer.from(JSON.stringify(claims), "utf8").toString("base64url");
+export function mintDecisionToken(
+  claims: DecisionTokenClaims,
+  secret: string,
+): string {
+  const payloadB64 = Buffer.from(JSON.stringify(claims), "utf8").toString(
+    "base64url",
+  );
   const signature = sign(payloadB64, secret).toString("base64url");
   return `${TOKEN_PREFIX}.${payloadB64}.${signature}`;
 }
@@ -96,13 +103,18 @@ export function verifyDecisionToken(
   } catch {
     return { ok: false, reason: "TOKEN_MALFORMED" };
   }
-  if (expected.length !== provided.length || !timingSafeEqual(expected, provided)) {
+  if (
+    expected.length !== provided.length ||
+    !timingSafeEqual(expected, provided)
+  ) {
     return { ok: false, reason: "TOKEN_SIGNATURE_INVALID" };
   }
 
   let claims: DecisionTokenClaims;
   try {
-    const parsed: unknown = JSON.parse(Buffer.from(payloadB64, "base64url").toString("utf8"));
+    const parsed: unknown = JSON.parse(
+      Buffer.from(payloadB64, "base64url").toString("utf8"),
+    );
     claims = decisionTokenClaimsSchema.parse(parsed);
   } catch (error) {
     void (error as z.ZodError);
@@ -136,7 +148,8 @@ export function findBindingMismatch(
   claims: DecisionTokenClaims,
   context: BindingContext,
 ): string | null {
-  if (claims.decisionId !== context.decisionId) return "TOKEN_DECISION_MISMATCH";
+  if (claims.decisionId !== context.decisionId)
+    return "TOKEN_DECISION_MISMATCH";
   if (claims.requestId !== context.requestId) return "TOKEN_REQUEST_MISMATCH";
   if (claims.policyId !== context.policyId) return "TOKEN_POLICY_MISMATCH";
   if (claims.policyVersion !== context.policyVersion) {
@@ -146,7 +159,8 @@ export function findBindingMismatch(
   if (claims.organizationId !== context.organizationId) {
     return "TOKEN_ORGANIZATION_MISMATCH";
   }
-  if (claims.scriptHash !== context.scriptHash) return "TOKEN_SCRIPT_HASH_MISMATCH";
+  if (claims.scriptHash !== context.scriptHash)
+    return "TOKEN_SCRIPT_HASH_MISMATCH";
   if (claims.provider !== context.provider) return "TOKEN_PROVIDER_MISMATCH";
   if (claims.model !== context.model) return "TOKEN_MODEL_MISMATCH";
   return null;

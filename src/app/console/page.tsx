@@ -49,7 +49,10 @@ export default async function ConsolePage() {
   const blockedCount = requests.filter((r) => r.status === "blocked").length;
 
   const expiryDays = policy
-    ? Math.max(0, Math.ceil((Date.parse(policy.validUntil) - Date.now()) / 86_400_000))
+    ? Math.max(
+        0,
+        Math.ceil((Date.parse(policy.validUntil) - Date.now()) / 86_400_000),
+      )
     : 0;
 
   return (
@@ -62,10 +65,12 @@ export default async function ConsolePage() {
               {owner?.displayName ?? "Owner"}
             </h1>
             <p className="mt-1.5 text-[13.5px] text-text-secondary">
-              Active voice: <span className="text-text-primary">{voice?.displayName}</span>
+              Active voice:{" "}
+              <span className="text-text-primary">{voice?.displayName}</span>
               {policy && (
                 <>
-                  {" "}· policy v{policy.version} · {policy.status}
+                  {" "}
+                  · policy v{policy.version} · {policy.status}
                 </>
               )}
             </p>
@@ -87,7 +92,7 @@ export default async function ConsolePage() {
         <RoleNotice
           message="You are viewing as Bilal (requester). Policy control belongs to the owner persona."
           targetRole="owner"
-          targetLabel="Switch to Awaiz — owner"
+          targetLabel="Switch to Umar — owner"
         />
       )}
 
@@ -119,7 +124,9 @@ export default async function ConsolePage() {
                 "No policy yet"
               )
             }
-            action={policy ? <PolicyStatusSeal status={policy.status} /> : undefined}
+            action={
+              policy ? <PolicyStatusSeal status={policy.status} /> : undefined
+            }
             className="h-full"
           >
             {policy ? (
@@ -128,24 +135,40 @@ export default async function ConsolePage() {
                   <PolicyChip label="org" value="Kanban Studios" />
                   <PolicyChip
                     label="purposes"
-                    value={policy.allowedPurposes.map((p) => PURPOSE_LABELS[p]).join(" · ")}
+                    value={policy.allowedPurposes
+                      .map((p) => PURPOSE_LABELS[p])
+                      .join(" · ")}
                   />
                   <PolicyChip
                     label="platforms"
-                    value={policy.allowedPlatforms.map((p) => PLATFORM_LABELS[p]).join(" · ")}
+                    value={policy.allowedPlatforms
+                      .map((p) => PLATFORM_LABELS[p])
+                      .join(" · ")}
                   />
                   <PolicyChip
                     label="languages"
-                    value={policy.allowedLanguages.map((l) => LANGUAGE_LABELS[l]).join(" · ")}
+                    value={policy.allowedLanguages
+                      .map((l) => LANGUAGE_LABELS[l])
+                      .join(" · ")}
                   />
                   <PolicyChip
                     label="territories"
-                    value={policy.allowedTerritories.map(territoryLabel).join(" · ")}
+                    value={policy.allowedTerritories
+                      .map(territoryLabel)
+                      .join(" · ")}
                   />
                   <PolicyChip
                     label="placement"
-                    value={policy.paidAdvertising === "prohibited" ? "Organic only" : "Paid allowed"}
-                    tone={policy.paidAdvertising === "prohibited" ? "warning" : "approved"}
+                    value={
+                      policy.paidAdvertising === "prohibited"
+                        ? "Organic only"
+                        : "Paid allowed"
+                    }
+                    tone={
+                      policy.paidAdvertising === "prohibited"
+                        ? "warning"
+                        : "approved"
+                    }
                   />
                   {policy.prohibitedTopics.length > 0 && (
                     <PolicyChip
@@ -156,7 +179,11 @@ export default async function ConsolePage() {
                   )}
                   <PolicyChip
                     label="editing"
-                    value={policy.editingAllowed ? "Light edits allowed" : "No editing"}
+                    value={
+                      policy.editingAllowed
+                        ? "Light edits allowed"
+                        : "No editing"
+                    }
                   />
                 </ChipGroup>
 
@@ -184,15 +211,22 @@ export default async function ConsolePage() {
                   “{policy.sourceConsentText}”
                 </blockquote>
                 <p className="forensic mt-3 text-[11px] text-text-muted">
-                  approved {policy.ownerApprovedAt ? formatUtcDateTime(policy.ownerApprovedAt) : "—"} ·
-                  valid until {formatUtcDate(policy.validUntil)}
-                  {policy.revokedAt && ` · revoked ${formatUtcDateTime(policy.revokedAt)}`}
+                  approved{" "}
+                  {policy.ownerApprovedAt
+                    ? formatUtcDateTime(policy.ownerApprovedAt)
+                    : "—"}{" "}
+                  · valid until {formatUtcDate(policy.validUntil)}
+                  {policy.revokedAt &&
+                    ` · revoked ${formatUtcDateTime(policy.revokedAt)}`}
                 </p>
               </>
             ) : (
               <p className="text-[13.5px] text-text-secondary">
                 Create a consent policy in the{" "}
-                <Link href="/studio" className="text-informational underline-offset-2 hover:underline">
+                <Link
+                  href="/studio"
+                  className="text-informational underline-offset-2 hover:underline"
+                >
                   Consent Studio
                 </Link>
                 .
@@ -227,12 +261,22 @@ export default async function ConsolePage() {
                   />
                 ))}
                 <div className="grid grid-cols-3 gap-3">
-                  <MetricGlass label="Approved" value={String(approvedCount)} tone="approved" />
-                  <MetricGlass label="Blocked" value={String(blockedCount)} tone="blocked" />
+                  <MetricGlass
+                    label="Approved"
+                    value={String(approvedCount)}
+                    tone="approved"
+                  />
+                  <MetricGlass
+                    label="Blocked"
+                    value={String(blockedCount)}
+                    tone="blocked"
+                  />
                   <MetricGlass
                     label="Expires in"
                     value={policy?.status === "active" ? `${expiryDays}d` : "—"}
-                    detail={policy ? formatUtcDate(policy.validUntil) : undefined}
+                    detail={
+                      policy ? formatUtcDate(policy.validUntil) : undefined
+                    }
                   />
                 </div>
               </div>
@@ -278,7 +322,8 @@ export default async function ConsolePage() {
                             {PLATFORM_LABELS[amendment.proposal.platform]}
                           </span>
                           <span className="block text-[11.5px] capitalize text-text-muted">
-                            {amendment.status} · {formatUtcDateTime(amendment.createdAt)}
+                            {amendment.status} ·{" "}
+                            {formatUtcDateTime(amendment.createdAt)}
                           </span>
                         </span>
                         <ArrowRight
@@ -296,7 +341,11 @@ export default async function ConsolePage() {
 
         {/* recent requests */}
         <Reveal delay={0.2} className="lg:col-span-7">
-          <GlassPanel eyebrow="Recent activity" title="Generation requests" className="h-full">
+          <GlassPanel
+            eyebrow="Recent activity"
+            title="Generation requests"
+            className="h-full"
+          >
             {requestsWithDecisions.length === 0 ? (
               <p className="text-[13px] text-text-muted">
                 No requests yet. Bilal submits them through the Generation Gate.
@@ -309,7 +358,11 @@ export default async function ConsolePage() {
                     className="glass-inset flex flex-wrap items-center gap-x-4 gap-y-2 px-3.5 py-3"
                   >
                     <DecisionBadge
-                      kind={decision?.outcome === "approved" ? "approved" : "blocked"}
+                      kind={
+                        decision?.outcome === "approved"
+                          ? "approved"
+                          : "blocked"
+                      }
                       size="compact"
                     />
                     <span className="min-w-0 flex-1 text-[13px] text-text-secondary">

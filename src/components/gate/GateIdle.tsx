@@ -20,7 +20,11 @@ export function GateIdle({ policy }: { policy: ConsentPolicy | null }) {
     return (
       <Reveal delay={0.1}>
         <div className="glass-panel flex min-h-[320px] flex-col items-center justify-center p-8 text-center">
-          <ShieldCheck className="h-8 w-8 text-text-muted" strokeWidth={1.4} aria-hidden />
+          <ShieldCheck
+            className="h-8 w-8 text-text-muted"
+            strokeWidth={1.4}
+            aria-hidden
+          />
           <p className="mt-4 max-w-[36ch] text-[14px] text-text-secondary">
             No consent policy exists for this voice yet. The owner creates one
             in the Consent Studio.
@@ -57,14 +61,38 @@ export function GateIdle({ policy }: { policy: ConsentPolicy | null }) {
         </div>
 
         <ChipGroup className="mt-5">
-          <PolicyChip label="purposes" value={policy.allowedPurposes.map((p) => PURPOSE_LABELS[p]).join(" · ")} />
-          <PolicyChip label="platforms" value={policy.allowedPlatforms.map((p) => PLATFORM_LABELS[p]).join(" · ")} />
-          <PolicyChip label="languages" value={policy.allowedLanguages.map((l) => LANGUAGE_LABELS[l]).join(" · ")} />
-          <PolicyChip label="territories" value={policy.allowedTerritories.map(territoryLabel).join(" · ")} />
+          <PolicyChip
+            label="purposes"
+            value={policy.allowedPurposes
+              .map((p) => PURPOSE_LABELS[p])
+              .join(" · ")}
+          />
+          <PolicyChip
+            label="platforms"
+            value={policy.allowedPlatforms
+              .map((p) => PLATFORM_LABELS[p])
+              .join(" · ")}
+          />
+          <PolicyChip
+            label="languages"
+            value={policy.allowedLanguages
+              .map((l) => LANGUAGE_LABELS[l])
+              .join(" · ")}
+          />
+          <PolicyChip
+            label="territories"
+            value={policy.allowedTerritories.map(territoryLabel).join(" · ")}
+          />
           <PolicyChip
             label="placement"
-            value={policy.paidAdvertising === "prohibited" ? "Organic only" : "Paid allowed"}
-            tone={policy.paidAdvertising === "prohibited" ? "warning" : "approved"}
+            value={
+              policy.paidAdvertising === "prohibited"
+                ? "Organic only"
+                : "Paid allowed"
+            }
+            tone={
+              policy.paidAdvertising === "prohibited" ? "warning" : "approved"
+            }
           />
           <PolicyChip
             label="allowance"
@@ -77,9 +105,17 @@ export function GateIdle({ policy }: { policy: ConsentPolicy | null }) {
               tone="blocked"
             />
           )}
-          <PolicyChip label="valid until" value={formatUtcDate(policy.validUntil)} />
+          <PolicyChip
+            label="valid until"
+            value={formatUtcDate(policy.validUntil)}
+          />
           {policy.grants.map((grant) => (
-            <PolicyChip key={grant.id} label="grant" value={grant.label} tone="informational" />
+            <PolicyChip
+              key={grant.id}
+              label="grant"
+              value={grant.label}
+              tone="informational"
+            />
           ))}
         </ChipGroup>
 

@@ -31,7 +31,10 @@ export async function GET(
 
   const bytes = await store.getAssetBytes(assetId);
   if (!bytes) {
-    return NextResponse.json({ error: "Asset bytes unavailable" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Asset bytes unavailable" },
+      { status: 404 },
+    );
   }
 
   return new NextResponse(new Uint8Array(bytes), {

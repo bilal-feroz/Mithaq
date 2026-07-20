@@ -4,7 +4,12 @@
  * verification → revocation → audit chain.
  */
 import { beforeEach, describe, expect, it } from "vitest";
-import { DEMO_CAMPAIGN_NAME, DEMO_IDS, DEMO_SCRIPT_AR, INJECTION_SCRIPT } from "@/domain/fixtures";
+import {
+  DEMO_CAMPAIGN_NAME,
+  DEMO_IDS,
+  DEMO_SCRIPT_AR,
+  INJECTION_SCRIPT,
+} from "@/domain/fixtures";
 import { hashScript, sha256Hex } from "@/domain/hash";
 import { verifyAuditChain } from "@/domain/audit";
 import type { GenerationRequestInput } from "@/domain/schemas";
@@ -23,7 +28,9 @@ const requesterActor = {
 };
 const ownerActor = { profileId: DEMO_IDS.owner };
 
-function baseInput(overrides: Partial<GenerationRequestInput> = {}): GenerationRequestInput {
+function baseInput(
+  overrides: Partial<GenerationRequestInput> = {},
+): GenerationRequestInput {
   return {
     voiceId: DEMO_IDS.voice,
     script: DEMO_SCRIPT_AR,
@@ -57,7 +64,9 @@ describe("evaluation service", () => {
       requesterActor,
     );
     expect(outcome.decision.outcome).toBe("blocked");
-    const failed = outcome.decision.clauses.filter((c) => c.status === "failed");
+    const failed = outcome.decision.clauses.filter(
+      (c) => c.status === "failed",
+    );
     expect(failed.map((c) => c.code)).toEqual(["PAID_ADVERTISING_PROHIBITED"]);
   });
 
@@ -68,7 +77,9 @@ describe("evaluation service", () => {
     );
     expect(outcome.decision.outcome).toBe("blocked");
     expect(
-      outcome.decision.clauses.filter((c) => c.status === "failed").map((c) => c.code),
+      outcome.decision.clauses
+        .filter((c) => c.status === "failed")
+        .map((c) => c.code),
     ).toEqual(["PAID_ADVERTISING_PROHIBITED"]);
   });
 });
@@ -81,19 +92,29 @@ describe("amendment → version 2 → automatic rerun", () => {
     );
     expect(blocked.decision.outcome).toBe("blocked");
 
-    const amendment = await draftAmendmentForRequest(blocked.request.id, requesterActor);
+    const amendment = await draftAmendmentForRequest(
+      blocked.request.id,
+      requesterActor,
+    );
     expect(amendment.status).toBe("pending");
     expect(amendment.proposal.kind).toBe("scoped_paid_placement");
     expect(amendment.proposal.additionalAssets).toBe(1);
     expect(amendment.proposal.campaignName).toBe(DEMO_CAMPAIGN_NAME);
 
-    const result = await decideAmendment(amendment.id, "approved", null, ownerActor);
+    const result = await decideAmendment(
+      amendment.id,
+      "approved",
+      null,
+      ownerActor,
+    );
     expect(result.newPolicy?.version).toBe(2);
     expect(result.newPolicy?.supersedesPolicyId).toBe(DEMO_IDS.policyV1);
     expect(result.newPolicy?.grants).toHaveLength(1);
     expect(result.rerun?.decision.outcome).toBe("approved");
     expect(result.rerun?.decision.policyVersion).toBe(2);
-    expect(result.rerun?.decision.matchedGrantId).toBe(result.newPolicy?.grants[0]?.id);
+    expect(result.rerun?.decision.matchedGrantId).toBe(
+      result.newPolicy?.grants[0]?.id,
+    );
 
     // History preserved: v1 still exists, superseded, unmutated terms.
     const store = getStore();
@@ -112,9 +133,14 @@ describe("amendment → version 2 → automatic rerun", () => {
       baseInput({ placement: "paid" }),
       requesterActor,
     );
-    const amendment = await draftAmendmentForRequest(blocked.request.id, requesterActor);
+    const amendment = await draftAmendmentForRequest(
+      blocked.request.id,
+      requesterActor,
+    );
     await expect(
-      decideAmendment(amendment.id, "approved", null, { profileId: DEMO_IDS.requester }),
+      decideAmendment(amendment.id, "approved", null, {
+        profileId: DEMO_IDS.requester,
+      }),
     ).rejects.toThrow(/voice owner/i);
   });
 
@@ -123,8 +149,14 @@ describe("amendment → version 2 → automatic rerun", () => {
       baseInput({ placement: "paid" }),
       requesterActor,
     );
-    const first = await draftAmendmentForRequest(blocked.request.id, requesterActor);
-    const second = await draftAmendmentForRequest(blocked.request.id, requesterActor);
+    const first = await draftAmendmentForRequest(
+      blocked.request.id,
+      requesterActor,
+    );
+    const second = await draftAmendmentForRequest(
+      blocked.request.id,
+      requesterActor,
+    );
     expect(second.id).toBe(first.id);
   });
 });
@@ -135,7 +167,10 @@ describe("token → generation → asset", () => {
       baseInput({ placement: "paid" }),
       requesterActor,
     );
-    const amendment = await draftAmendmentForRequest(blocked.request.id, requesterActor);
+    const amendment = await draftAmendmentForRequest(
+      blocked.request.id,
+      requesterActor,
+    );
     await decideAmendment(amendment.id, "approved", null, ownerActor);
     return blocked.request.id;
   }
@@ -179,7 +214,10 @@ describe("token → generation → asset", () => {
     const store = getStore();
     const tokens = await store.listTokensForRequest(requestId);
     expect(tokens).toHaveLength(1);
-    const replay = await store.consumeToken(tokens[0]!.jti, new Date().toISOString());
+    const replay = await store.consumeToken(
+      tokens[0]!.jti,
+      new Date().toISOString(),
+    );
     expect(replay.ok).toBe(false);
     if (!replay.ok) expect(replay.reason).toBe("TOKEN_REPLAYED");
   });
@@ -276,22 +314,39 @@ describe("revocation and verification", () => {
       baseInput({ placement: "paid" }),
       requesterActor,
     );
-    const amendment = await draftAmendmentForRequest(blocked.request.id, requesterActor);
-    const decided = await decideAmendment(amendment.id, "approved", null, ownerActor);
+    const amendment = await draftAmendmentForRequest(
+      blocked.request.id,
+      requesterActor,
+    );
+    const decided = await decideAmendment(
+      amendment.id,
+      "approved",
+      null,
+      ownerActor,
+    );
     await generateAssetForRequest(blocked.request.id, requesterActor);
 
     await revokePolicy(decided.newPolicy!.id, ownerActor);
 
-    const rerun = await reevaluateRequest(blocked.request.id, DEMO_IDS.requester);
+    const rerun = await reevaluateRequest(
+      blocked.request.id,
+      DEMO_IDS.requester,
+    );
     expect(rerun.decision.outcome).toBe("blocked");
     expect(
-      rerun.decision.clauses.filter((c) => c.status === "failed").map((c) => c.code),
+      rerun.decision.clauses
+        .filter((c) => c.status === "failed")
+        .map((c) => c.code),
     ).toContain("POLICY_REVOKED");
 
     // Historical decisions unchanged.
     const store = getStore();
     const decisions = await store.listDecisionsForRequest(blocked.request.id);
-    expect(decisions.map((d) => d.outcome)).toEqual(["blocked", "approved", "blocked"]);
+    expect(decisions.map((d) => d.outcome)).toEqual([
+      "blocked",
+      "approved",
+      "blocked",
+    ]);
 
     // The asset record remains visible.
     const asset = await store.getAssetForRequest(blocked.request.id);
@@ -301,7 +356,9 @@ describe("revocation and verification", () => {
     const verification = await getPublicVerification(asset!.verificationId);
     expect(verification?.status).toBe("revoked");
     expect(verification?.policyVersionUsed).toBe(2);
-    expect(verification?.statusDetail).toMatch(/approved under policy version 2/i);
+    expect(verification?.statusDetail).toMatch(
+      /approved under policy version 2/i,
+    );
     expect(verification?.statusDetail).toMatch(/revoked/i);
   });
 
@@ -310,18 +367,30 @@ describe("revocation and verification", () => {
       baseInput({ placement: "paid" }),
       requesterActor,
     );
-    const amendment = await draftAmendmentForRequest(blocked.request.id, requesterActor);
+    const amendment = await draftAmendmentForRequest(
+      blocked.request.id,
+      requesterActor,
+    );
     await decideAmendment(amendment.id, "approved", null, ownerActor);
-    const generated = await generateAssetForRequest(blocked.request.id, requesterActor);
+    const generated = await generateAssetForRequest(
+      blocked.request.id,
+      requesterActor,
+    );
 
     const store = getStore();
     const original = await store.getAssetBytes(generated.asset.id);
-    const exact = await compareUploadedFile(generated.asset.verificationId, original!);
+    const exact = await compareUploadedFile(
+      generated.asset.verificationId,
+      original!,
+    );
     expect(exact?.match).toBe("exact");
 
     const tampered = Buffer.from(original!);
     tampered[100] = (tampered[100]! + 1) % 256;
-    const modified = await compareUploadedFile(generated.asset.verificationId, tampered);
+    const modified = await compareUploadedFile(
+      generated.asset.verificationId,
+      tampered,
+    );
     expect(modified?.match).toBe("modified");
   });
 });
@@ -332,8 +401,16 @@ describe("audit chain", () => {
       baseInput({ placement: "paid" }),
       requesterActor,
     );
-    const amendment = await draftAmendmentForRequest(blocked.request.id, requesterActor);
-    const decided = await decideAmendment(amendment.id, "approved", null, ownerActor);
+    const amendment = await draftAmendmentForRequest(
+      blocked.request.id,
+      requesterActor,
+    );
+    const decided = await decideAmendment(
+      amendment.id,
+      "approved",
+      null,
+      ownerActor,
+    );
     await generateAssetForRequest(blocked.request.id, requesterActor);
     await revokePolicy(decided.newPolicy!.id, ownerActor);
 

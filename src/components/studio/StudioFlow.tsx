@@ -96,11 +96,14 @@ export function StudioFlow({
         purposes: draft.allowedPurposes,
         platforms: draft.allowedPlatforms,
         languages: draft.allowedLanguages,
-        territories: draft.allowedTerritories.length > 0 ? draft.allowedTerritories : [],
+        territories:
+          draft.allowedTerritories.length > 0 ? draft.allowedTerritories : [],
         paidAdvertising: draft.paidAdvertising ?? "prohibited",
         editingAllowed: false,
         maximumAssets: draft.maximumAssets ?? 1,
-        validUntil: draft.validUntil ? draft.validUntil.slice(0, 10) : "2026-07-30",
+        validUntil: draft.validUntil
+          ? draft.validUntil.slice(0, 10)
+          : "2026-07-30",
         prohibitedTopics: draft.prohibitedTopics,
       });
       setStage("review");
@@ -152,8 +155,15 @@ export function StudioFlow({
   if (stage === "issued") {
     return (
       <Reveal className="mt-8">
-        <section className="glass-strong halo-approved light-sweep mx-auto max-w-[640px] p-8 text-center" aria-live="polite">
-          <CheckCircle2 className="mx-auto h-10 w-10 text-approved" strokeWidth={1.6} aria-hidden />
+        <section
+          className="glass-strong halo-approved light-sweep mx-auto max-w-[640px] p-8 text-center"
+          aria-live="polite"
+        >
+          <CheckCircle2
+            className="mx-auto h-10 w-10 text-approved"
+            strokeWidth={1.6}
+            aria-hidden
+          />
           <h2 className="display mt-4 text-[22px] font-bold text-text-primary">
             Policy version {issuedVersion} is active
           </h2>
@@ -179,7 +189,11 @@ export function StudioFlow({
     <div className="mt-7 grid items-start gap-6 lg:grid-cols-12">
       {/* capture column */}
       <Reveal delay={0.05} className="lg:col-span-5">
-        <GlassPanel eyebrow="Step 1" title="Dynamic consent challenge" className="lg:sticky lg:top-8">
+        <GlassPanel
+          eyebrow="Step 1"
+          title="Dynamic consent challenge"
+          className="lg:sticky lg:top-8"
+        >
           <p className="text-[12.5px] leading-relaxed text-text-secondary">
             Read this server-generated phrase aloud while recording — it ties
             the capture to this moment. It is a consent record, not biometric
@@ -199,7 +213,11 @@ export function StudioFlow({
               <label htmlFor="consent-text" className="micro-label">
                 Consent statement (text fallback)
               </label>
-              <div role="radiogroup" aria-label="Statement language" className="flex gap-1 rounded-[8px] border border-border-glass bg-black/30 p-0.5">
+              <div
+                role="radiogroup"
+                aria-label="Statement language"
+                className="flex gap-1 rounded-[8px] border border-border-glass bg-black/30 p-0.5"
+              >
                 {(["en", "ar"] as const).map((value) => (
                   <button
                     key={value}
@@ -235,13 +253,17 @@ export function StudioFlow({
           </div>
 
           {error && stage === "capture" && (
-            <p role="alert" className="mt-3 text-[12.5px] text-blocked">{error}</p>
+            <p role="alert" className="mt-3 text-[12.5px] text-blocked">
+              {error}
+            </p>
           )}
 
           <button
             type="button"
             data-testid="extract-terms"
-            disabled={isPending || !isOwner || !voice || consentText.trim().length < 10}
+            disabled={
+              isPending || !isOwner || !voice || consentText.trim().length < 10
+            }
             onClick={runExtraction}
             className="action-primary mt-5 w-full"
           >
@@ -258,7 +280,10 @@ export function StudioFlow({
             )}
           </button>
           <p className="mt-2 text-center text-[11px] text-text-muted">
-            extraction adapter: {aiProvider === "mock" ? "deterministic demo extractor" : aiProvider}
+            extraction adapter:{" "}
+            {aiProvider === "mock"
+              ? "deterministic demo extractor"
+              : aiProvider}
           </p>
         </GlassPanel>
       </Reveal>
@@ -268,7 +293,11 @@ export function StudioFlow({
         {stage === "capture" || !review || !extraction ? (
           <Reveal delay={0.1}>
             <div className="glass-panel flex min-h-[420px] flex-col items-center justify-center p-10 text-center">
-              <Wand2 className="h-8 w-8 text-text-muted" strokeWidth={1.4} aria-hidden />
+              <Wand2
+                className="h-8 w-8 text-text-muted"
+                strokeWidth={1.4}
+                aria-hidden
+              />
               <p className="mt-4 max-w-[38ch] text-[13.5px] leading-relaxed text-text-muted">
                 Extracted terms appear here as a structured policy passport —
                 with anything missing or ambiguous flagged for your decision.
@@ -295,23 +324,37 @@ export function StudioFlow({
                   </p>
                   <ul className="mt-2 flex flex-col gap-1.5">
                     {extraction.missingFields.map((field) => (
-                      <li key={field} className="text-[12.5px] text-text-secondary">
-                        <span className="forensic text-warning">{field}</span> — not
-                        stated in the consent; set it below.
+                      <li
+                        key={field}
+                        className="text-[12.5px] text-text-secondary"
+                      >
+                        <span className="forensic text-warning">{field}</span> —
+                        not stated in the consent; set it below.
                       </li>
                     ))}
                     {extraction.ambiguousFields.map((entry) => (
-                      <li key={entry.field} className="text-[12.5px] text-text-secondary">
-                        <span className="forensic text-warning">{entry.field}</span> —{" "}
-                        {entry.note}
+                      <li
+                        key={entry.field}
+                        className="text-[12.5px] text-text-secondary"
+                      >
+                        <span className="forensic text-warning">
+                          {entry.field}
+                        </span>{" "}
+                        — {entry.note}
                       </li>
                     ))}
                   </ul>
                   {extraction.clarificationQuestions.length > 0 && (
                     <div className="mt-3 border-t border-warning/20 pt-3">
                       {extraction.clarificationQuestions.map((question) => (
-                        <p key={question} className="flex items-start gap-2 text-[12.5px] italic text-text-secondary">
-                          <HelpCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning" aria-hidden />
+                        <p
+                          key={question}
+                          className="flex items-start gap-2 text-[12.5px] italic text-text-secondary"
+                        >
+                          <HelpCircle
+                            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-warning"
+                            aria-hidden
+                          />
                           {question}
                         </p>
                       ))}
@@ -323,25 +366,37 @@ export function StudioFlow({
               <div className="flex flex-col gap-5">
                 <ToggleGroup
                   label="Authorized organizations"
-                  options={organizations.map((org) => ({ value: org.id, label: org.name }))}
+                  options={organizations.map((org) => ({
+                    value: org.id,
+                    label: org.name,
+                  }))}
                   selected={review.organizationIds}
                   onToggle={(value) => toggle("organizationIds", value)}
                 />
                 <ToggleGroup
                   label="Purposes"
-                  options={PURPOSES.map((p) => ({ value: p, label: PURPOSE_LABELS[p] }))}
+                  options={PURPOSES.map((p) => ({
+                    value: p,
+                    label: PURPOSE_LABELS[p],
+                  }))}
                   selected={review.purposes}
                   onToggle={(value) => toggle("purposes", value)}
                 />
                 <ToggleGroup
                   label="Platforms"
-                  options={PLATFORMS.map((p) => ({ value: p, label: PLATFORM_LABELS[p] }))}
+                  options={PLATFORMS.map((p) => ({
+                    value: p,
+                    label: PLATFORM_LABELS[p],
+                  }))}
                   selected={review.platforms}
                   onToggle={(value) => toggle("platforms", value)}
                 />
                 <ToggleGroup
                   label="Languages"
-                  options={LANGUAGES.map((l) => ({ value: l, label: LANGUAGE_LABELS[l] }))}
+                  options={LANGUAGES.map((l) => ({
+                    value: l,
+                    label: LANGUAGE_LABELS[l],
+                  }))}
                   selected={review.languages}
                   onToggle={(value) => toggle("languages", value)}
                 />
@@ -358,7 +413,9 @@ export function StudioFlow({
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <span className="micro-label mb-1.5 block">Paid advertising</span>
+                    <span className="micro-label mb-1.5 block">
+                      Paid advertising
+                    </span>
                     <div className="grid grid-cols-2 gap-1 rounded-[11px] border border-border-glass bg-black/30 p-1">
                       {(["prohibited", "allowed"] as const).map((value) => (
                         <button
@@ -366,7 +423,9 @@ export function StudioFlow({
                           type="button"
                           aria-pressed={review.paidAdvertising === value}
                           onClick={() =>
-                            setReview((c) => c && { ...c, paidAdvertising: value })
+                            setReview(
+                              (c) => c && { ...c, paidAdvertising: value },
+                            )
                           }
                           className={cn(
                             "min-h-[38px] rounded-[8px] text-[12.5px] font-semibold capitalize",
@@ -383,7 +442,9 @@ export function StudioFlow({
                     </div>
                   </div>
                   <div>
-                    <span className="micro-label mb-1.5 block">Editing of audio</span>
+                    <span className="micro-label mb-1.5 block">
+                      Editing of audio
+                    </span>
                     <div className="grid grid-cols-2 gap-1 rounded-[11px] border border-border-glass bg-black/30 p-1">
                       {[
                         { value: false, label: "Not allowed" },
@@ -394,7 +455,10 @@ export function StudioFlow({
                           type="button"
                           aria-pressed={review.editingAllowed === option.value}
                           onClick={() =>
-                            setReview((c) => c && { ...c, editingAllowed: option.value })
+                            setReview(
+                              (c) =>
+                                c && { ...c, editingAllowed: option.value },
+                            )
                           }
                           className={cn(
                             "min-h-[38px] rounded-[8px] text-[12.5px] font-semibold",
@@ -409,7 +473,10 @@ export function StudioFlow({
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="max-assets" className="micro-label mb-1.5 block">
+                    <label
+                      htmlFor="max-assets"
+                      className="micro-label mb-1.5 block"
+                    >
                       Maximum assets
                     </label>
                     <input
@@ -420,14 +487,21 @@ export function StudioFlow({
                       value={review.maximumAssets}
                       onChange={(event) =>
                         setReview(
-                          (c) => c && { ...c, maximumAssets: Number(event.target.value) || 1 },
+                          (c) =>
+                            c && {
+                              ...c,
+                              maximumAssets: Number(event.target.value) || 1,
+                            },
                         )
                       }
                       className="field"
                     />
                   </div>
                   <div>
-                    <label htmlFor="valid-until" className="micro-label mb-1.5 block">
+                    <label
+                      htmlFor="valid-until"
+                      className="micro-label mb-1.5 block"
+                    >
                       Valid until
                     </label>
                     <input
@@ -435,7 +509,9 @@ export function StudioFlow({
                       type="date"
                       value={review.validUntil}
                       onChange={(event) =>
-                        setReview((c) => c && { ...c, validUntil: event.target.value })
+                        setReview(
+                          (c) => c && { ...c, validUntil: event.target.value },
+                        )
                       }
                       className="field [color-scheme:dark]"
                     />
@@ -444,10 +520,12 @@ export function StudioFlow({
 
                 <ToggleGroup
                   label="Prohibited topics (explicit prohibitions override permissions)"
-                  options={["politics", "religion", "gambling", "alcohol"].map((t) => ({
-                    value: t,
-                    label: t,
-                  }))}
+                  options={["politics", "religion", "gambling", "alcohol"].map(
+                    (t) => ({
+                      value: t,
+                      label: t,
+                    }),
+                  )}
                   selected={review.prohibitedTopics}
                   onToggle={(value) => toggle("prohibitedTopics", value)}
                   tone="blocked"
@@ -455,14 +533,19 @@ export function StudioFlow({
               </div>
 
               {error && stage === "review" && (
-                <p role="alert" className="mt-4 text-[12.5px] text-blocked">{error}</p>
+                <p role="alert" className="mt-4 text-[12.5px] text-blocked">
+                  {error}
+                </p>
               )}
 
               {existingPolicyVersion !== null && (
                 <p className="mt-5 rounded-[10px] border border-informational/25 bg-informational-soft px-3.5 py-2.5 text-[12.5px] text-text-secondary">
                   An active policy v{existingPolicyVersion} exists. Approving
-                  issues <strong className="text-text-primary">version {existingPolicyVersion + 1}</strong>,
-                  superseding it — history is preserved, never rewritten.
+                  issues{" "}
+                  <strong className="text-text-primary">
+                    version {existingPolicyVersion + 1}
+                  </strong>
+                  , superseding it — history is preserved, never rewritten.
                 </p>
               )}
 
@@ -491,8 +574,8 @@ export function StudioFlow({
                 )}
               </button>
               <p className="mt-2 text-center text-[11px] text-text-muted">
-                Only this approved structure is enforced. The AI draft carries no
-                authority.
+                Only this approved structure is enforced. The AI draft carries
+                no authority.
               </p>
             </GlassPanel>
           </Reveal>

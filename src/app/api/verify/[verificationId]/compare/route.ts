@@ -36,7 +36,10 @@ export async function POST(
   const bytes = Buffer.from(await file.arrayBuffer());
   const result = await compareUploadedFile(verificationId, bytes);
   if (!result) {
-    return NextResponse.json({ error: "Verification not found" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Verification not found" },
+      { status: 404 },
+    );
   }
   return NextResponse.json(result);
 }

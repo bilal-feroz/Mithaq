@@ -53,7 +53,9 @@ export function ConsentRecorder() {
       setSeconds(0);
       timerRef.current = setInterval(() => setSeconds((s) => s + 1), 1000);
     } catch {
-      setError("Microphone unavailable — use the text statement below instead.");
+      setError(
+        "Microphone unavailable — use the text statement below instead.",
+      );
     }
   }
 
@@ -100,7 +102,8 @@ export function ConsentRecorder() {
                 <span className="h-2.5 w-2.5 rounded-full bg-blocked" />
               </span>
               <p className="text-[13px] font-medium text-text-primary">
-                Recording the challenge… {String(Math.floor(seconds / 60)).padStart(1, "0")}:
+                Recording the challenge…{" "}
+                {String(Math.floor(seconds / 60)).padStart(1, "0")}:
                 {String(seconds % 60).padStart(2, "0")}
               </p>
             </div>

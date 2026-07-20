@@ -51,7 +51,12 @@ export function RevealList({
       animate="show"
       variants={{
         hidden: {},
-        show: { transition: { staggerChildren: reduced ? 0 : stagger, delayChildren: delay } },
+        show: {
+          transition: {
+            staggerChildren: reduced ? 0 : stagger,
+            delayChildren: delay,
+          },
+        },
       }}
       className={className}
     >
@@ -72,7 +77,11 @@ export function RevealItem({
     <motion.li
       variants={{
         hidden: reduced ? { opacity: 0 } : { opacity: 0, y: 6 },
-        show: { opacity: 1, y: 0, transition: { duration: 0.26, ease: [0.2, 0.8, 0.2, 1] } },
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.26, ease: [0.2, 0.8, 0.2, 1] },
+        },
       }}
       className={className}
     >

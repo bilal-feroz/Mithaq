@@ -16,9 +16,9 @@ function claimsFixture() {
   return buildClaims({
     decisionId: "dec-1",
     requestId: "req-1",
-    policyId: "policy-awaiz-v1",
+    policyId: "policy-umar-v1",
     policyVersion: 1,
-    voiceId: "voice-awaiz-demo",
+    voiceId: "voice-umar-demo",
     organizationId: "org-kanban",
     scriptHash: hashScript("hello world script"),
     provider: "mock",
@@ -44,7 +44,11 @@ describe("decision tokens", () => {
 
   it("rejects an expired token (~60s TTL)", () => {
     const token = mintDecisionToken(claimsFixture(), SECRET);
-    const verification = verifyDecisionToken(token, SECRET, NOW + TOKEN_TTL_SECONDS + 1);
+    const verification = verifyDecisionToken(
+      token,
+      SECRET,
+      NOW + TOKEN_TTL_SECONDS + 1,
+    );
     expect(verification).toEqual({ ok: false, reason: "TOKEN_EXPIRED" });
   });
 
@@ -56,20 +60,33 @@ describe("decision tokens", () => {
       Buffer.from(parts[2]!, "base64url").toString("utf8"),
     ) as Record<string, unknown>;
     payload.policyVersion = 99; // attempt to bind to a different policy version
-    parts[2] = Buffer.from(JSON.stringify(payload), "utf8").toString("base64url");
+    parts[2] = Buffer.from(JSON.stringify(payload), "utf8").toString(
+      "base64url",
+    );
     const verification = verifyDecisionToken(parts.join("."), SECRET, NOW + 5);
-    expect(verification).toEqual({ ok: false, reason: "TOKEN_SIGNATURE_INVALID" });
+    expect(verification).toEqual({
+      ok: false,
+      reason: "TOKEN_SIGNATURE_INVALID",
+    });
   });
 
   it("rejects a token signed with a different secret", () => {
-    const token = mintDecisionToken(claimsFixture(), "another-secret-another-secret-123456");
+    const token = mintDecisionToken(
+      claimsFixture(),
+      "another-secret-another-secret-123456",
+    );
     const verification = verifyDecisionToken(token, SECRET, NOW + 5);
-    expect(verification).toEqual({ ok: false, reason: "TOKEN_SIGNATURE_INVALID" });
+    expect(verification).toEqual({
+      ok: false,
+      reason: "TOKEN_SIGNATURE_INVALID",
+    });
   });
 
   it("rejects malformed tokens", () => {
     expect(verifyDecisionToken("not-a-token", SECRET, NOW).ok).toBe(false);
-    expect(verifyDecisionToken("mtqdt.v1.only-two-parts", SECRET, NOW).ok).toBe(false);
+    expect(verifyDecisionToken("mtqdt.v1.only-two-parts", SECRET, NOW).ok).toBe(
+      false,
+    );
   });
 
   it("detects every binding mismatch", () => {
@@ -77,9 +94,9 @@ describe("decision tokens", () => {
     const context = {
       decisionId: "dec-1",
       requestId: "req-1",
-      policyId: "policy-awaiz-v1",
+      policyId: "policy-umar-v1",
       policyVersion: 1,
-      voiceId: "voice-awaiz-demo",
+      voiceId: "voice-umar-demo",
       organizationId: "org-kanban",
       scriptHash: hashScript("hello world script"),
       provider: "mock",
@@ -89,9 +106,9 @@ describe("decision tokens", () => {
     expect(
       findBindingMismatch(claims, { ...context, requestId: "req-2" }),
     ).toBe("TOKEN_REQUEST_MISMATCH");
-    expect(
-      findBindingMismatch(claims, { ...context, policyVersion: 2 }),
-    ).toBe("TOKEN_POLICY_VERSION_MISMATCH");
+    expect(findBindingMismatch(claims, { ...context, policyVersion: 2 })).toBe(
+      "TOKEN_POLICY_VERSION_MISMATCH",
+    );
     expect(
       findBindingMismatch(claims, {
         ...context,

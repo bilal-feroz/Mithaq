@@ -14,25 +14,100 @@ import type { AuditEvent } from "@/domain/types";
 import { formatUtcDateTime, shortHash } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
-const EVENT_META: Record<string, { label: string; icon: typeof Sparkles; tone: string }> = {
-  "voice.registered": { label: "Voice registered", icon: Mic2, tone: "text-text-secondary" },
-  "consent.extracted": { label: "Consent terms extracted", icon: Sparkles, tone: "text-informational" },
-  "policy.created": { label: "Policy drafted", icon: FileSignature, tone: "text-text-secondary" },
-  "policy.activated": { label: "Policy approved by owner", icon: CheckCircle2, tone: "text-approved" },
-  "policy.version_created": { label: "New policy version issued", icon: GitBranch, tone: "text-informational" },
-  "policy.superseded": { label: "Previous version superseded", icon: GitBranch, tone: "text-text-secondary" },
-  "policy.revoked": { label: "Policy revoked by owner", icon: ShieldOff, tone: "text-blocked" },
-  "request.submitted": { label: "Generation request submitted", icon: FileSignature, tone: "text-text-secondary" },
-  "decision.approved": { label: "Request approved", icon: CheckCircle2, tone: "text-approved" },
-  "decision.blocked": { label: "Request blocked", icon: Ban, tone: "text-blocked" },
-  "amendment.requested": { label: "Amendment proposed", icon: FileSignature, tone: "text-warning" },
-  "amendment.approved": { label: "Amendment approved", icon: CheckCircle2, tone: "text-approved" },
-  "amendment.rejected": { label: "Amendment rejected", icon: Ban, tone: "text-blocked" },
-  "token.minted": { label: "Authorization token minted", icon: KeyRound, tone: "text-informational" },
-  "token.consumed": { label: "Token consumed (single use)", icon: KeyRound, tone: "text-approved" },
-  "token.rejected": { label: "Token rejected", icon: ShieldAlert, tone: "text-blocked" },
-  "asset.generated": { label: "Audio asset registered", icon: FileAudio, tone: "text-approved" },
-  "generation.failed": { label: "Provider generation failed", icon: ShieldAlert, tone: "text-blocked" },
+const EVENT_META: Record<
+  string,
+  { label: string; icon: typeof Sparkles; tone: string }
+> = {
+  "voice.registered": {
+    label: "Voice registered",
+    icon: Mic2,
+    tone: "text-text-secondary",
+  },
+  "consent.extracted": {
+    label: "Consent terms extracted",
+    icon: Sparkles,
+    tone: "text-informational",
+  },
+  "policy.created": {
+    label: "Policy drafted",
+    icon: FileSignature,
+    tone: "text-text-secondary",
+  },
+  "policy.activated": {
+    label: "Policy approved by owner",
+    icon: CheckCircle2,
+    tone: "text-approved",
+  },
+  "policy.version_created": {
+    label: "New policy version issued",
+    icon: GitBranch,
+    tone: "text-informational",
+  },
+  "policy.superseded": {
+    label: "Previous version superseded",
+    icon: GitBranch,
+    tone: "text-text-secondary",
+  },
+  "policy.revoked": {
+    label: "Policy revoked by owner",
+    icon: ShieldOff,
+    tone: "text-blocked",
+  },
+  "request.submitted": {
+    label: "Generation request submitted",
+    icon: FileSignature,
+    tone: "text-text-secondary",
+  },
+  "decision.approved": {
+    label: "Request approved",
+    icon: CheckCircle2,
+    tone: "text-approved",
+  },
+  "decision.blocked": {
+    label: "Request blocked",
+    icon: Ban,
+    tone: "text-blocked",
+  },
+  "amendment.requested": {
+    label: "Amendment proposed",
+    icon: FileSignature,
+    tone: "text-warning",
+  },
+  "amendment.approved": {
+    label: "Amendment approved",
+    icon: CheckCircle2,
+    tone: "text-approved",
+  },
+  "amendment.rejected": {
+    label: "Amendment rejected",
+    icon: Ban,
+    tone: "text-blocked",
+  },
+  "token.minted": {
+    label: "Authorization token minted",
+    icon: KeyRound,
+    tone: "text-informational",
+  },
+  "token.consumed": {
+    label: "Token consumed (single use)",
+    icon: KeyRound,
+    tone: "text-approved",
+  },
+  "token.rejected": {
+    label: "Token rejected",
+    icon: ShieldAlert,
+    tone: "text-blocked",
+  },
+  "asset.generated": {
+    label: "Audio asset registered",
+    icon: FileAudio,
+    tone: "text-approved",
+  },
+  "generation.failed": {
+    label: "Provider generation failed",
+    icon: ShieldAlert,
+    tone: "text-blocked",
+  },
 };
 
 /** One hash-linked audit event in the vertical timeline. */
@@ -68,7 +143,8 @@ export function TimelineEvent({
           {meta.label}
         </p>
         <p className="forensic mt-1 text-[11px] text-text-muted">
-          {formatUtcDateTime(event.createdAt)} · #{shortHash(event.currentEventHash, 10)}
+          {formatUtcDateTime(event.createdAt)} · #
+          {shortHash(event.currentEventHash, 10)}
         </p>
       </div>
     </li>

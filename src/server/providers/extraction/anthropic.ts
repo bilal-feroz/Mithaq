@@ -11,7 +11,10 @@ import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
 // The SDK's structured-output helper expects Zod v4 schemas; zod@3.25+
 // ships the v4 API under the "zod/v4" subpath alongside our v3 domain schemas.
 import { z as z4 } from "zod/v4";
-import { extractionResultSchema, type ExtractionResult } from "@/domain/schemas";
+import {
+  extractionResultSchema,
+  type ExtractionResult,
+} from "@/domain/schemas";
 import { LANGUAGES, PLATFORMS, PURPOSES, type Language } from "@/domain/types";
 import type { ConsentExtractionAdapter } from "./types";
 
@@ -33,7 +36,9 @@ const wireSchema = z4.object({
     prohibitedTopics: z4.array(z4.string()),
   }),
   missingFields: z4.array(z4.string()),
-  ambiguousFields: z4.array(z4.object({ field: z4.string(), note: z4.string() })),
+  ambiguousFields: z4.array(
+    z4.object({ field: z4.string(), note: z4.string() }),
+  ),
   confidenceNotes: z4.array(z4.string()),
   clarificationQuestions: z4.array(z4.string()),
 });

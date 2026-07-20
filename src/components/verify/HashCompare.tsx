@@ -35,7 +35,9 @@ export function HashCompare({ verificationId }: { verificationId: string }) {
         method: "POST",
         body,
       });
-      const json = (await response.json()) as CompareResult & { error?: string };
+      const json = (await response.json()) as CompareResult & {
+        error?: string;
+      };
       if (!response.ok) {
         setError(json.error ?? "Comparison failed.");
       } else {
@@ -58,7 +60,12 @@ export function HashCompare({ verificationId }: { verificationId: string }) {
             registered master — the file itself is never stored.
           </p>
         </div>
-        <label className={cn("action-quiet cursor-pointer", busy && "pointer-events-none opacity-60")}>
+        <label
+          className={cn(
+            "action-quiet cursor-pointer",
+            busy && "pointer-events-none opacity-60",
+          )}
+        >
           {busy ? (
             <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
           ) : (
@@ -99,9 +106,17 @@ export function HashCompare({ verificationId }: { verificationId: string }) {
           )}
         >
           {result.match === "exact" ? (
-            <ShieldCheck className="mt-0.5 h-5 w-5 shrink-0 text-approved" strokeWidth={1.9} aria-hidden />
+            <ShieldCheck
+              className="mt-0.5 h-5 w-5 shrink-0 text-approved"
+              strokeWidth={1.9}
+              aria-hidden
+            />
           ) : (
-            <ShieldX className="mt-0.5 h-5 w-5 shrink-0 text-warning" strokeWidth={1.9} aria-hidden />
+            <ShieldX
+              className="mt-0.5 h-5 w-5 shrink-0 text-warning"
+              strokeWidth={1.9}
+              aria-hidden
+            />
           )}
           <div className="min-w-0">
             <p
@@ -115,7 +130,9 @@ export function HashCompare({ verificationId }: { verificationId: string }) {
                 : "Modified — not byte-identical to the registered master"}
             </p>
             <p className="mt-1 text-[12px] leading-relaxed text-text-secondary">
-              {fileName && <span className="text-text-primary">{fileName}</span>}{" "}
+              {fileName && (
+                <span className="text-text-primary">{fileName}</span>
+              )}{" "}
               · uploaded {shortHash(result.uploadedSha256, 14)} vs registered{" "}
               {shortHash(result.registeredSha256, 14)}
             </p>
