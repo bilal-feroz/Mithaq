@@ -17,7 +17,7 @@ const ROLES: {
     role: "owner",
     name: "Umar",
     descriptor: "Voice owner",
-    initials: "AA",
+    initials: "U",
     testId: "role-switch-owner",
   },
   {
