@@ -109,7 +109,8 @@ export function ConsentRecorder() {
             </div>
           ) : audioUrl ? (
             <p className="text-[12.5px] text-text-secondary">
-              Recording captured — kept with your consent record.
+              Recording captured locally for this session; this prototype does
+              not upload or persist it.
             </p>
           ) : (
             <p className="text-[12.5px] text-text-muted">
@@ -126,7 +127,11 @@ export function ConsentRecorder() {
           className="mt-3 w-full"
         />
       )}
-      {error && <p className="mt-2 text-[12px] text-warning">{error}</p>}
+      {error && (
+        <p role="alert" className="mt-2 text-[12px] text-warning">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

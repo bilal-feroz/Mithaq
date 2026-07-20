@@ -115,6 +115,18 @@ export interface DataStore {
 
   // ── generated assets ─────────────────────────────────────────────────
   insertAsset(asset: GeneratedAsset, bytes: Buffer): Promise<void>;
+  /**
+   * Atomically registers a generated asset, consumes the applicable usage
+   * allowance, and marks its request generated. A concurrent finalization for
+   * the same request or exhausted allowance must leave no registered asset or
+   * usage drift.
+   */
+  finalizeGeneration(
+    asset: GeneratedAsset,
+    bytes: Buffer,
+    grantId: string | null,
+    completedAt: string,
+  ): Promise<ConsentPolicy>;
   getAsset(id: string): Promise<GeneratedAsset | null>;
   getAssetByVerificationId(
     verificationId: string,

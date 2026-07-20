@@ -227,22 +227,48 @@ create unique index audit_events_prev_unique
 -- Single-use token consumption: succeeds exactly once per jti.
 create or replace function public.consume_decision_token(p_jti text, p_consumed_at timestamptz)
 returns table (ok boolean, reason text) language plpgsql security definer as $$
-declare v_status text;
+declare v_status text; v_policy_status text; v_policy_id text; v_voice_id text; v_policy_version int;
 begin
+  -- Lock the policy row while validating and consuming so revocation cannot
+  -- commit between the gateway's final status check and token consumption.
+  select dt.status, cp.status, cp.id, cp.voice_id, cp.version
+    into v_status, v_policy_status, v_policy_id, v_voice_id, v_policy_version
+    from public.decision_tokens dt
+    join public.consent_policies cp on cp.id = dt.policy_id
+   where dt.jti = p_jti
+   for share of cp;
+
+  if v_status is null then
+    return query select false, 'TOKEN_UNKNOWN'; return;
+  elsif v_status = 'consumed' then
+    return query select false, 'TOKEN_REPLAYED'; return;
+  elsif v_status <> 'minted' then
+    return query select false, 'TOKEN_INVALIDATED'; return;
+  end if;
+
+  if v_policy_status = 'revoked' then
+    update public.decision_tokens
+       set status = 'rejected', rejected_reason = 'POLICY_REVOKED'
+     where jti = p_jti and status = 'minted';
+    return query select false, 'POLICY_REVOKED'; return;
+  end if;
+  if v_policy_status <> 'active' or exists (
+    select 1 from public.consent_policies newer
+     where newer.voice_id = v_voice_id and newer.version > v_policy_version
+  ) then
+    update public.decision_tokens
+       set status = 'rejected', rejected_reason = 'POLICY_SUPERSEDED'
+     where jti = p_jti and status = 'minted';
+    return query select false, 'POLICY_SUPERSEDED'; return;
+  end if;
+
   update public.decision_tokens
      set status = 'consumed', consumed_at = p_consumed_at
    where jti = p_jti and status = 'minted';
   if found then
     return query select true, null::text; return;
   end if;
-  select status into v_status from public.decision_tokens where jti = p_jti;
-  if v_status is null then
-    return query select false, 'TOKEN_UNKNOWN';
-  elsif v_status = 'consumed' then
-    return query select false, 'TOKEN_REPLAYED';
-  else
-    return query select false, 'TOKEN_INVALIDATED';
-  end if;
+  return query select false, 'TOKEN_INVALIDATED';
 end $$;
 
 -- Atomic usage increment with headroom check (base pool or a grant pool).
@@ -272,6 +298,39 @@ begin
        set grants = jsonb_set(grants, array[v_index::text], v_grant), updated_at = p_updated_at
      where id = p_policy_id;
   end if;
+end $$;
+
+-- Atomic successful-generation finalization. Storage upload happens first;
+-- this transaction then consumes allowance, registers exactly one asset per
+-- request, and marks the request generated. Any error rolls all database
+-- mutations back; the server removes the uploaded private object on failure.
+create or replace function public.finalize_generation(
+  p_asset jsonb, p_grant_id text, p_completed_at timestamptz
+) returns void language plpgsql security definer as $$
+begin
+  perform public.increment_policy_usage(
+    p_asset ->> 'policyId', p_grant_id, p_completed_at
+  );
+
+  insert into public.generated_assets (
+    id, verification_id, decision_id, request_id, policy_id, policy_version,
+    voice_id, organization_id, storage_path, sha256, mime_type, byte_length,
+    provider, provider_asset_id, created_at
+  ) values (
+    p_asset ->> 'id', p_asset ->> 'verificationId',
+    p_asset ->> 'decisionId', p_asset ->> 'requestId',
+    p_asset ->> 'policyId', (p_asset ->> 'policyVersion')::int,
+    p_asset ->> 'voiceId', p_asset ->> 'organizationId',
+    p_asset ->> 'storagePath', p_asset ->> 'sha256',
+    p_asset ->> 'mimeType', (p_asset ->> 'byteLength')::bigint,
+    p_asset ->> 'provider', p_asset ->> 'providerAssetId',
+    (p_asset ->> 'createdAt')::timestamptz
+  );
+
+  update public.generation_requests
+     set status = 'generated', updated_at = p_completed_at
+   where id = p_asset ->> 'requestId' and status = 'generating';
+  if not found then raise exception 'REQUEST_NOT_GENERATING'; end if;
 end $$;
 
 -- Atomic policy versioning: supersede the active version + insert the new one.
@@ -311,6 +370,26 @@ begin
     p_new_policy ->> 'supersedesPolicyId', null,
     (p_new_policy ->> 'createdAt')::timestamptz, (p_new_policy ->> 'updatedAt')::timestamptz;
 end $$;
+
+-- These SECURITY DEFINER mutations are server-only RPCs. Supabase exposes
+-- database functions over its API, so default PUBLIC execute privileges must
+-- be removed explicitly.
+revoke execute on function public.consume_decision_token(text, timestamptz)
+  from public, anon, authenticated;
+revoke execute on function public.increment_policy_usage(text, text, timestamptz)
+  from public, anon, authenticated;
+revoke execute on function public.finalize_generation(jsonb, text, timestamptz)
+  from public, anon, authenticated;
+revoke execute on function public.create_policy_version(text, jsonb)
+  from public, anon, authenticated;
+grant execute on function public.consume_decision_token(text, timestamptz)
+  to service_role;
+grant execute on function public.increment_policy_usage(text, text, timestamptz)
+  to service_role;
+grant execute on function public.finalize_generation(jsonb, text, timestamptz)
+  to service_role;
+grant execute on function public.create_policy_version(text, jsonb)
+  to service_role;
 
 -- ═══════════════════════════════════════════════════════════════════════
 -- Row Level Security
@@ -360,11 +439,10 @@ language sql stable security definer as $$
   );
 $$;
 
--- profiles: read own row; owners/requesters are visible to counterparties via views only
+-- Profiles: read own row. Domain writes are server-only through authorized
+-- application actions; the service role bypasses RLS.
 create policy profiles_select_own on public.profiles
   for select using (auth_user_id = auth.uid());
-create policy profiles_update_own on public.profiles
-  for update using (auth_user_id = auth.uid());
 
 -- organizations: members can read their organization
 create policy organizations_select_member on public.organizations
@@ -373,10 +451,10 @@ create policy organizations_select_member on public.organizations
 create policy organization_members_select_own on public.organization_members
   for select using (profile_id = public.current_profile_id());
 
--- voice profiles: owners manage; requesters may read voices whose policies authorize them
-create policy voice_profiles_owner_all on public.voice_profiles
-  for all using (owner_id = public.current_profile_id())
-  with check (owner_id = public.current_profile_id());
+-- Voice profiles: owners read their records; requesters may read voices whose
+-- policies authorize them. Creation/changes remain server-only.
+create policy voice_profiles_owner_read on public.voice_profiles
+  for select using (owner_id = public.current_profile_id());
 create policy voice_profiles_requester_read on public.voice_profiles
   for select using (exists (
     select 1 from public.consent_policies cp
@@ -388,10 +466,10 @@ create policy voice_profiles_requester_read on public.voice_profiles
       )
   ));
 
--- consent policies: owners full control; requesters read policies that authorize their orgs
-create policy consent_policies_owner_all on public.consent_policies
-  for all using (owner_id = public.current_profile_id())
-  with check (owner_id = public.current_profile_id());
+-- Consent policies: owners and authorized requesters can read. Versioning,
+-- approval and revocation remain server-only atomic operations.
+create policy consent_policies_owner_read on public.consent_policies
+  for select using (owner_id = public.current_profile_id());
 create policy consent_policies_requester_read on public.consent_policies
   for select using (
     authorized_organization_ids && (
@@ -404,10 +482,6 @@ create policy consent_policies_requester_read on public.consent_policies
 -- generation requests: members of the requesting organization + the voice owner
 create policy generation_requests_member on public.generation_requests
   for select using (public.is_member_of(organization_id) or public.owns_voice(voice_id));
-create policy generation_requests_insert_member on public.generation_requests
-  for insert with check (
-    public.is_member_of(organization_id) and requester_id = public.current_profile_id()
-  );
 
 -- decisions + clauses: visible to the request's organization and the voice owner
 create policy policy_decisions_visible on public.policy_decisions
@@ -435,9 +509,9 @@ create policy amendment_requests_visible on public.amendment_requests
 create policy generated_assets_visible on public.generated_assets
   for select using (public.is_member_of(organization_id) or public.owns_voice(voice_id));
 
--- audit events: voice owners see events; org members see their aggregates.
-create policy audit_events_owner_read on public.audit_events
-  for select using (public.current_profile_id() is not null);
+-- Audit events are server-only. The owner console reads them through the
+-- authorized application server; no direct client policy is intentionally
+-- granted because aggregate payloads span owners and organizations.
 
 -- ── public verifier view (anon-safe fields only) ────────────────────────
 

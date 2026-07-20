@@ -310,7 +310,7 @@ export async function redeemDecisionToken(
   }
 
   // 6. Register the asset: hash, store, bind to decision + policy version,
-  //    increment usage atomically, chain audit events.
+  //    consume usage, and update request state in one store transaction.
   const completedAt = new Date().toISOString();
   const asset: GeneratedAsset = {
     id: `asset-${opaqueId(8)}`,
@@ -329,13 +329,30 @@ export async function redeemDecisionToken(
     providerAssetId: generated.providerAssetId ?? null,
     createdAt: completedAt,
   };
-  await store.insertAsset(asset, generated.audioBuffer);
-  await store.incrementPolicyUsage(
-    decision.policyId,
-    decision.matchedGrantId,
-    completedAt,
-  );
-  await store.updateRequestStatus(request.id, "generated", completedAt);
+  try {
+    await store.finalizeGeneration(
+      asset,
+      generated.audioBuffer,
+      decision.matchedGrantId,
+      completedAt,
+    );
+  } catch (error) {
+    const existingAsset = await store.getAssetForRequest(request.id);
+    if (existingAsset) {
+      throw new GenerationDeniedError(
+        "ALREADY_GENERATED",
+        "An asset has already been generated for this request.",
+      );
+    }
+    await store.updateRequestStatus(request.id, "failed", completedAt);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new GenerationDeniedError(
+      message.includes("USAGE_LIMIT_REACHED")
+        ? "USAGE_LIMIT_REACHED"
+        : "FINALIZATION_ERROR",
+      "The generated audio could not be registered safely. No usage was recorded for this attempt.",
+    );
+  }
 
   await store.appendAuditEvent({
     aggregateType: "decision_token",

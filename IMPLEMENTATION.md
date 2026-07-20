@@ -1,9 +1,10 @@
 # MITHAQ Gate — Implementation Checklist
 
-All phases complete. Verification status: **72/72 unit tests · 3/3 Playwright
+All phases complete. Verification status: **75/75 unit tests · 5/5 Playwright
 E2E · `tsc --noEmit` clean · ESLint clean · Prettier applied.**
 
 ## Phase 1 — Repository & design foundation
+
 - [x] Inspect repository (empty fresh git repo — built from scratch)
 - [x] Scaffold: Next.js 15 App Router, strict TS, Tailwind v4, ESLint, Prettier
 - [x] Vitest + Playwright configuration
@@ -16,6 +17,7 @@ E2E · `tsc --noEmit` clean · ESLint clean · Prettier applied.**
 - [x] Environment validation (`src/server/env.ts`), demo mode default
 
 ## Phase 2 — Deterministic domain core
+
 - [x] Zod schemas + TS types: `ConsentPolicy`, `GenerationRequest`, grants, enums
 - [x] Stable reason codes + UI message map
 - [x] Script normalization (documented + tested, incl. NFC/CRLF/NBSP)
@@ -25,6 +27,7 @@ E2E · `tsc --noEmit` clean · ESLint clean · Prettier applied.**
 - [x] 50 domain tests incl. prompt injection, determinism, every lifecycle state
 
 ## Phase 3 — Persistence
+
 - [x] `DataStore` interface (data-access layer)
 - [x] `LocalStore` (in-process, atomic ops, seeded, reset)
 - [x] Seed: Umar (owner) / Bilal @ Kanban Studios / policy v1 (mirrors fixtures)
@@ -37,17 +40,20 @@ E2E · `tsc --noEmit` clean · ESLint clean · Prettier applied.**
 - [x] Policy versioning (copy → increment → supersede; never mutate)
 
 ## Phase 4 — Authorization & generation
+
 - [x] Decision persistence with full clause results
 - [x] Signed tokens (HMAC-SHA256, 60s TTL, jti, single-use, full binding)
 - [x] Atomic consumption, replay rejection, mismatch rejection,
       revocation-after-mint rejection, usage recheck
 - [x] Mock voice provider (deterministic playable WAV from script hash)
 - [x] ElevenLabs adapter (server-side only, used only with key)
-- [x] Asset hashing, storage, registration, atomic usage increment (base/grant)
+- [x] Asset hashing and atomic asset registration + usage + request completion
+      (base/grant), including concurrent-finalization defense
 - [x] Opaque verification IDs + server-generated QR codes
 - [x] 22 token/service integration tests
 
 ## Phase 5 — Application workflows
+
 - [x] Shell: rail nav, role switcher, provider badge, atmosphere, mobile bar
 - [x] Landing (hook, policy passport, persona entry, pipeline, limitations)
 - [x] Consent Studio (dynamic consent challenge, recorder, extraction,
@@ -63,6 +69,7 @@ E2E · `tsc --noEmit` clean · ESLint clean · Prettier applied.**
 - [x] Demo reset endpoint + asset streaming + compare API
 
 ## Phase 6 — Visual refinement
+
 - [x] Screenshot walk of all 18 screen states at 1440×900 + mobile 390
 - [x] Fixed: grid-overlay mask bleeding onto landing content
 - [x] Fixed: decision-first ordering on mobile gate
@@ -71,8 +78,10 @@ E2E · `tsc --noEmit` clean · ESLint clean · Prettier applied.**
       cues, grid alignment, negative space, purposeful motion
 
 ## Phase 7 — Proof
-- [x] `npm test` — 72 passed
-- [x] `npm run e2e` — 3 passed (primary flow, injection defense, studio)
+
+- [x] `npm test` — 75 passed
+- [x] `npm run e2e` — 5 passed (primary flow, injection defense, studio,
+      deterministic reset, six-viewport console/overflow QA)
 - [x] `npm run typecheck` — clean
 - [x] `npm run lint` — clean
 - [x] `npm run format` — applied, all checks re-verified

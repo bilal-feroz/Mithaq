@@ -12,5 +12,13 @@ export async function POST() {
     );
   }
   await getStore().reset();
-  return NextResponse.json({ ok: true });
+  const response = NextResponse.json({ ok: true });
+  response.cookies.set("mithaq_role", "owner", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: env.appUrl.startsWith("https://"),
+    path: "/",
+    maxAge: 60 * 60 * 24 * 7,
+  });
+  return response;
 }

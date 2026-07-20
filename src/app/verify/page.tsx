@@ -3,10 +3,17 @@ import { ScanSearch } from "lucide-react";
 import { Reveal } from "@/components/glass/Reveal";
 import { SecurityLabel } from "@/components/glass/SecurityLabel";
 import { VerifyLookup } from "@/components/verify/VerifyLookup";
+import { DEMO_IDS } from "@/domain/fixtures";
+import { getStore } from "@/server/data";
+import { getEnv } from "@/server/env";
 
 export const metadata: Metadata = { title: "Public Verifier" };
 
-export default function VerifyIndexPage() {
+export default async function VerifyIndexPage() {
+  const env = getEnv();
+  const latestAsset = env.demoMode
+    ? (await getStore().listAssetsForOwner(DEMO_IDS.owner))[0]
+    : null;
   return (
     <div className="mx-auto max-w-[760px]">
       <Reveal>
@@ -32,7 +39,9 @@ export default function VerifyIndexPage() {
         </div>
       </Reveal>
       <Reveal delay={0.1} className="mt-8">
-        <VerifyLookup />
+        <VerifyLookup
+          latestVerificationId={latestAsset?.verificationId ?? null}
+        />
       </Reveal>
       <Reveal delay={0.16} className="mt-10 text-center">
         <p className="mx-auto max-w-[60ch] text-[11.5px] leading-relaxed text-text-muted">

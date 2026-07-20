@@ -26,6 +26,29 @@ test("primary demo flow: approve → block → amend → v2 → generate → rev
   request,
 }) => {
   test.setTimeout(180_000);
+  const browserErrors: string[] = [];
+  const failedRequests: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") {
+      browserErrors.push(`${page.url()}: ${message.text()}`);
+    }
+  });
+  page.on("pageerror", (error) =>
+    browserErrors.push(`${page.url()}: ${error.message}`),
+  );
+  page.on("requestfailed", (failed) => {
+    const reason = failed.failure()?.errorText ?? "unknown";
+    // Next.js cancels speculative RSC prefetches during navigation. Those
+    // expected aborts are not failed application requests.
+    if (!reason.includes("ERR_ABORTED")) {
+      failedRequests.push(`${failed.method()} ${failed.url()} (${reason})`);
+    }
+  });
+  page.on("response", (response) => {
+    if (response.status() >= 500) {
+      failedRequests.push(`${response.status()} ${response.url()}`);
+    }
+  });
 
   // 0. Fresh seeded world.
   const reset = await request.post("/api/demo/reset");
@@ -62,6 +85,9 @@ test("primary demo flow: approve → block → amend → v2 → generate → rev
   await expect(
     surface.getByText(/can proceed as an organic post/i),
   ).toBeVisible();
+  await page.screenshot({
+    path: "docs/submission-screenshots/generation-gate-blocked.png",
+  });
 
   const blockedUrl = page.url();
 
@@ -80,6 +106,9 @@ test("primary demo flow: approve → block → amend → v2 → generate → rev
   await expect(
     page.getByText(/one paid instagram placement/i).first(),
   ).toBeVisible();
+  await page.screenshot({
+    path: "docs/submission-screenshots/amendment-review.png",
+  });
 
   // 7-8. Approve → policy version 2 exists, old version preserved.
   await page.getByTestId("approve-amendment").click();
@@ -120,6 +149,35 @@ test("primary demo flow: approve → block → amend → v2 → generate → rev
   expect(audioResponse.ok()).toBeTruthy();
   expect(audioResponse.headers()["content-type"]).toContain("audio/wav");
 
+  // Exact-file and modified-file comparison both work; uploads are discarded.
+  const masterBytes = await audioResponse.body();
+  await page.goto(verificationHref!);
+  await page.getByTestId("compare-file-input").setInputFiles({
+    name: "mithaq-master.wav",
+    mimeType: "audio/wav",
+    buffer: masterBytes,
+  });
+  await expect(page.getByTestId("compare-result")).toHaveAttribute(
+    "data-match",
+    "exact",
+  );
+  const modifiedBytes = Buffer.from(masterBytes);
+  modifiedBytes[100] = (modifiedBytes[100]! + 1) % 256;
+  await page.getByTestId("compare-file-input").setInputFiles({
+    name: "mithaq-modified.wav",
+    mimeType: "audio/wav",
+    buffer: modifiedBytes,
+  });
+  await expect(page.getByTestId("compare-result")).toHaveAttribute(
+    "data-match",
+    "modified",
+  );
+
+  // Demo verifier entry can open the latest asset without copying its ID.
+  await page.goto("/verify");
+  await page.getByTestId("verify-latest-asset").click();
+  await page.waitForURL(`**${verificationHref}`);
+
   // The verifier currently shows ACTIVE consent.
   await page.goto(verificationHref!);
   await expect(page.getByTestId("verification-status")).toHaveAttribute(
@@ -152,6 +210,11 @@ test("primary demo flow: approve → block → amend → v2 → generate → rev
   await expect(status).toHaveAttribute("data-status", "revoked");
   await expect(status).toContainText(/approved under policy version 2/i);
   await expect(status).toContainText(/revoked/i);
+  await page.screenshot({
+    path: "docs/submission-screenshots/public-verification-revoked.png",
+  });
+  expect(browserErrors).toEqual([]);
+  expect(failedRequests).toEqual([]);
 });
 
 test("prompt injection in the script never alters authorization", async ({
@@ -202,4 +265,61 @@ test("consent studio: extraction surfaces missing terms and issues a policy vers
   await expect(page.getByText(/policy version 2 is active/i)).toBeVisible({
     timeout: 20_000,
   });
+});
+
+test("demo reset restores owner persona and removes all recording state", async ({
+  page,
+}) => {
+  await page.request.post("/api/demo/reset");
+  await page.goto("/");
+  await expect(page.getByTestId("role-switch-owner")).toHaveAttribute(
+    "aria-checked",
+    "true",
+  );
+  await page.goto("/verify");
+  await expect(page.getByTestId("verify-latest-asset")).toHaveCount(0);
+  await page.goto("/console");
+  await expect(page.getByTestId("policy-status")).toHaveText(/active/i);
+  await expect(page.getByText(/policy v1/i).first()).toBeVisible();
+});
+
+test("core routes have no console errors or horizontal overflow across target viewports", async ({
+  page,
+  request,
+}) => {
+  test.setTimeout(180_000);
+  await request.post("/api/demo/reset");
+  const errors: string[] = [];
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("pageerror", (error) => errors.push(error.message));
+
+  const viewports = [
+    { width: 1920, height: 1080 },
+    { width: 1440, height: 900 },
+    { width: 1366, height: 768 },
+    { width: 1024, height: 768 },
+    { width: 768, height: 1024 },
+    { width: 390, height: 844 },
+  ];
+  const routes = ["/", "/studio", "/gate", "/console", "/verify"];
+
+  for (const viewport of viewports) {
+    await page.setViewportSize(viewport);
+    for (const route of routes) {
+      await page.goto(route);
+      await expect(page.locator("h1")).toBeVisible();
+      const overflow = await page.evaluate(
+        () =>
+          document.documentElement.scrollWidth -
+          document.documentElement.clientWidth,
+      );
+      expect(
+        overflow,
+        `${route} at ${viewport.width}x${viewport.height}`,
+      ).toBeLessThanOrEqual(1);
+    }
+  }
+  expect(errors).toEqual([]);
 });

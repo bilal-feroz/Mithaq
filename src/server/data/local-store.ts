@@ -356,6 +356,54 @@ export class LocalStore implements DataStore {
     this.state.assetBytes.set(asset.id, Buffer.from(bytes));
   }
 
+  async finalizeGeneration(
+    asset: GeneratedAsset,
+    bytes: Buffer,
+    grantId: string | null,
+    completedAt: string,
+  ): Promise<ConsentPolicy> {
+    // Deliberately no awaited work: the checks and mutations form one
+    // non-interleavable local transaction.
+    if (
+      this.state.generatedAssets.some(
+        (entry) => entry.requestId === asset.requestId,
+      )
+    ) {
+      throw new Error("ASSET_ALREADY_EXISTS");
+    }
+
+    const policy = this.state.consentPolicies.find(
+      (entry) => entry.id === asset.policyId,
+    );
+    if (!policy) throw new Error(`Policy not found: ${asset.policyId}`);
+
+    const request = this.state.generationRequests.find(
+      (entry) => entry.id === asset.requestId,
+    );
+    if (!request) throw new Error(`Request not found: ${asset.requestId}`);
+
+    if (grantId) {
+      const grant = policy.grants.find((entry) => entry.id === grantId);
+      if (!grant) throw new Error(`Grant not found: ${grantId}`);
+      if (grant.assetsUsed >= grant.maximumAssets) {
+        throw new Error("USAGE_LIMIT_REACHED");
+      }
+      grant.assetsUsed += 1;
+    } else {
+      if (policy.assetsUsed >= policy.maximumAssets) {
+        throw new Error("USAGE_LIMIT_REACHED");
+      }
+      policy.assetsUsed += 1;
+    }
+
+    policy.updatedAt = completedAt;
+    request.status = "generated";
+    request.updatedAt = completedAt;
+    this.state.generatedAssets.push(structuredClone(asset));
+    this.state.assetBytes.set(asset.id, Buffer.from(bytes));
+    return structuredClone(policy);
+  }
+
   async getAsset(id: string): Promise<GeneratedAsset | null> {
     const found = this.state.generatedAssets.find((asset) => asset.id === id);
     return found ? structuredClone(found) : null;

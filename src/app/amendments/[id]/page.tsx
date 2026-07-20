@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Bot } from "lucide-react";
 import { getStore } from "@/server/data";
-import { getSession } from "@/server/session";
+import { canAccessRequest, getSession } from "@/server/session";
 import { PLATFORM_LABELS } from "@/lib/labels";
 import { formatUtcDate, formatUtcDateTime } from "@/lib/utils";
 import { GlassPanel } from "@/components/glass/GlassPanel";
@@ -38,6 +38,7 @@ export default async function AmendmentPage({
         : null,
     ]);
   if (!policy || !request) notFound();
+  if (!(await canAccessRequest(session, request))) notFound();
 
   const rerunDecision =
     amendment.status === "approved"

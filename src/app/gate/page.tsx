@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { DEMO_IDS } from "@/domain/fixtures";
 import { getStore } from "@/server/data";
 import { getEnv } from "@/server/env";
-import { getSession } from "@/server/session";
+import { canAccessRequest, getSession } from "@/server/session";
 import { GateForm } from "@/components/gate/GateForm";
 import { DecisionSurface } from "@/components/gate/DecisionSurface";
 import { GateIdle } from "@/components/gate/GateIdle";
@@ -26,7 +26,11 @@ export default async function GatePage({
   const voice = await store.getVoice(DEMO_IDS.voice);
   const owner = voice ? await store.getProfile(voice.ownerId) : null;
 
-  const request = requestId ? await store.getRequest(requestId) : null;
+  const loadedRequest = requestId ? await store.getRequest(requestId) : null;
+  const request =
+    loadedRequest && (await canAccessRequest(session, loadedRequest))
+      ? loadedRequest
+      : null;
   const decision = request
     ? await store.getLatestDecisionForRequest(request.id)
     : null;

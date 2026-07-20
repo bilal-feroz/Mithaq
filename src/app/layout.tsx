@@ -36,12 +36,35 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  ),
   title: {
     default: "MITHAQ Gate — verifiable consent for AI voices",
     template: "%s · MITHAQ Gate",
   },
   description:
     "OAuth-style authorization for your voice. Registries declare. Provenance records. MITHAQ enforces.",
+  applicationName: "MITHAQ Gate",
+  keywords: [
+    "AI voice consent",
+    "voice authorization",
+    "policy enforcement",
+    "AI governance",
+  ],
+  openGraph: {
+    type: "website",
+    title: "MITHAQ Gate — verifiable consent for AI voices",
+    description:
+      "A deterministic enforcement gateway for owner-approved AI voice use.",
+    siteName: "MITHAQ Gate",
+  },
+  twitter: {
+    card: "summary",
+    title: "MITHAQ Gate — verifiable consent for AI voices",
+    description:
+      "A deterministic enforcement gateway for owner-approved AI voice use.",
+  },
 };
 
 export default function RootLayout({

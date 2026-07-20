@@ -159,6 +159,38 @@ describe("amendment → version 2 → automatic rerun", () => {
     );
     expect(second.id).toBe(first.id);
   });
+
+  it("repeating the same amendment decision is idempotent", async () => {
+    const blocked = await submitGenerationRequest(
+      baseInput({ placement: "paid" }),
+      requesterActor,
+    );
+    const amendment = await draftAmendmentForRequest(
+      blocked.request.id,
+      requesterActor,
+    );
+    const first = await decideAmendment(
+      amendment.id,
+      "approved",
+      "Scoped demo approval",
+      ownerActor,
+    );
+    const repeated = await decideAmendment(
+      amendment.id,
+      "approved",
+      "Scoped demo approval",
+      ownerActor,
+    );
+
+    expect(repeated.newPolicy?.id).toBe(first.newPolicy?.id);
+    expect(repeated.rerun?.decision.id).toBe(first.rerun?.decision.id);
+    expect(
+      await getStore().listPolicyVersionsForVoice(DEMO_IDS.voice),
+    ).toHaveLength(2);
+    expect(
+      await getStore().listDecisionsForRequest(blocked.request.id),
+    ).toHaveLength(2);
+  });
 });
 
 describe("token → generation → asset", () => {
@@ -228,6 +260,30 @@ describe("token → generation → asset", () => {
     await expect(
       generateAssetForRequest(requestId, requesterActor),
     ).rejects.toMatchObject({ code: "ALREADY_GENERATED" });
+  });
+
+  it("finalizes concurrent redemptions without duplicate assets or usage drift", async () => {
+    const outcome = await submitGenerationRequest(baseInput(), requesterActor);
+    const attempts = await Promise.allSettled([
+      generateAssetForRequest(outcome.request.id, requesterActor),
+      generateAssetForRequest(outcome.request.id, requesterActor),
+    ]);
+
+    expect(
+      attempts.filter((attempt) => attempt.status === "fulfilled"),
+    ).toHaveLength(1);
+    const rejected = attempts.find(
+      (attempt): attempt is PromiseRejectedResult =>
+        attempt.status === "rejected",
+    );
+    expect(rejected?.reason).toMatchObject({ code: "ALREADY_GENERATED" });
+
+    const store = getStore();
+    expect(await store.listAssetsForOwner(DEMO_IDS.owner)).toHaveLength(1);
+    expect((await store.getPolicy(DEMO_IDS.policyV1))?.assetsUsed).toBe(1);
+    expect((await store.getRequest(outcome.request.id))?.status).toBe(
+      "generated",
+    );
   });
 
   it("rejects an unused token after the policy is revoked", async () => {
@@ -326,7 +382,15 @@ describe("revocation and verification", () => {
     );
     await generateAssetForRequest(blocked.request.id, requesterActor);
 
-    await revokePolicy(decided.newPolicy!.id, ownerActor);
+    const firstRevocation = await revokePolicy(
+      decided.newPolicy!.id,
+      ownerActor,
+    );
+    const repeatedRevocation = await revokePolicy(
+      decided.newPolicy!.id,
+      ownerActor,
+    );
+    expect(repeatedRevocation.revokedAt).toBe(firstRevocation.revokedAt);
 
     const rerun = await reevaluateRequest(
       blocked.request.id,
@@ -360,6 +424,11 @@ describe("revocation and verification", () => {
       /approved under policy version 2/i,
     );
     expect(verification?.statusDetail).toMatch(/revoked/i);
+    expect(
+      (await store.listAuditEvents()).filter(
+        (event) => event.eventType === "policy.revoked",
+      ),
+    ).toHaveLength(1);
   });
 
   it("hash-compares uploaded files: exact and modified", async () => {
@@ -424,5 +493,33 @@ describe("audit chain", () => {
     const verdict = verifyAuditChain(tampered);
     expect(verdict.valid).toBe(false);
     expect(verdict.firstBrokenAt?.index).toBe(4);
+  });
+
+  it("reset restores the exact seeded baseline", async () => {
+    const outcome = await submitGenerationRequest(baseInput(), requesterActor);
+    await generateAssetForRequest(outcome.request.id, requesterActor);
+    await getStore().reset();
+
+    const store = getStore();
+    const versions = await store.listPolicyVersionsForVoice(DEMO_IDS.voice);
+    expect(versions).toHaveLength(1);
+    expect(versions[0]).toMatchObject({
+      id: DEMO_IDS.policyV1,
+      version: 1,
+      status: "active",
+      assetsUsed: 0,
+      grants: [],
+      revokedAt: null,
+    });
+    expect(
+      await store.listRequestsForOrganization(DEMO_IDS.organization),
+    ).toHaveLength(0);
+    expect(
+      await store.listAmendmentsForOrganization(DEMO_IDS.organization),
+    ).toHaveLength(0);
+    expect(await store.listAssetsForOwner(DEMO_IDS.owner)).toHaveLength(0);
+    const audit = await store.listAuditEvents();
+    expect(audit).toHaveLength(3);
+    expect(verifyAuditChain(audit).valid).toBe(true);
   });
 });

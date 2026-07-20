@@ -13,10 +13,6 @@ export function getExtractionAdapter(): ConsentExtractionAdapter {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
       require("./anthropic") as typeof import("./anthropic");
     cached = new AnthropicExtractionAdapter(env.anthropicApiKey);
-  } else if (env.aiProvider === "openai") {
-    throw new Error(
-      "The OpenAI extraction adapter is not implemented in this MVP. Set AI_PROVIDER=anthropic or AI_PROVIDER=mock.",
-    );
   } else {
     cached = new MockExtractionAdapter();
   }

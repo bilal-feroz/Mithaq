@@ -247,8 +247,9 @@ export function StudioFlow({
               className="field resize-y leading-relaxed"
             />
             <p className="mt-1.5 text-[11px] text-text-muted">
-              Demo mode extracts from this text. With an AI key configured, the
-              recording is transcribed first.
+              This typed statement is the extraction source in both demo and
+              configured AI modes. Recording transcription is not implemented in
+              this prototype.
             </p>
           </div>
 

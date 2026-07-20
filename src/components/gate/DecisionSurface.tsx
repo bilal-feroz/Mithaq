@@ -33,7 +33,7 @@ import {
 import { cn, formatBytes, formatUtcDateTime, shortHash } from "@/lib/utils";
 import { DecisionBadge } from "@/components/glass/DecisionBadge";
 import { ClauseResultRow } from "@/components/glass/ClauseResultRow";
-import { RevealItem, RevealList } from "@/components/glass/Reveal";
+import { RevealList } from "@/components/glass/Reveal";
 import { SecurityLabel } from "@/components/glass/SecurityLabel";
 
 export function DecisionSurface({
@@ -181,12 +181,11 @@ export function DecisionSurface({
             ...failed,
             ...decision.clauses.filter((c) => c.status === "passed"),
           ].map((clause) => (
-            <RevealItem key={clause.clause}>
-              <ClauseResultRow
-                clause={clause}
-                emphasized={clause.status === "failed"}
-              />
-            </RevealItem>
+            <ClauseResultRow
+              key={clause.clause}
+              clause={clause}
+              emphasized={clause.status === "failed"}
+            />
           ))}
         </RevealList>
       </div>

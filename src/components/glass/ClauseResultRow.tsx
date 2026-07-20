@@ -1,4 +1,7 @@
+"use client";
+
 import { Check, X } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
 import type { ClauseResult } from "@/domain/types";
 import { cn } from "@/lib/utils";
 
@@ -14,8 +17,17 @@ export function ClauseResultRow({
   emphasized?: boolean;
 }) {
   const failed = clause.status === "failed";
+  const reduced = useReducedMotion();
   return (
-    <li
+    <motion.li
+      variants={{
+        hidden: reduced ? { opacity: 0 } : { opacity: 0, y: 6 },
+        show: {
+          opacity: 1,
+          y: 0,
+          transition: { duration: 0.26, ease: [0.2, 0.8, 0.2, 1] },
+        },
+      }}
       className={cn(
         "relative flex items-start gap-3 rounded-[10px] py-2.5 pl-4 pr-3",
         failed && "bg-blocked-soft/60",
@@ -71,7 +83,7 @@ export function ClauseResultRow({
           </p>
         )}
       </div>
-    </li>
+    </motion.li>
   );
 }
 

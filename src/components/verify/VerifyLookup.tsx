@@ -2,9 +2,13 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Sparkles } from "lucide-react";
 
-export function VerifyLookup() {
+export function VerifyLookup({
+  latestVerificationId,
+}: {
+  latestVerificationId: string | null;
+}) {
   const router = useRouter();
   const [value, setValue] = useState("");
   return (
@@ -12,7 +16,11 @@ export function VerifyLookup() {
       className="glass-panel mx-auto flex max-w-[540px] flex-col gap-3 p-6"
       onSubmit={(event) => {
         event.preventDefault();
-        const id = value.trim().split("/").pop();
+        const cleaned = value
+          .trim()
+          .replace(/[?#].*$/, "")
+          .replace(/\/+$/, "");
+        const id = cleaned.split("/").filter(Boolean).at(-1);
         if (id) router.push(`/verify/${id}`);
       }}
     >
@@ -37,8 +45,21 @@ export function VerifyLookup() {
         </button>
       </div>
       <p className="text-[11.5px] text-text-muted">
-        Generate an asset through the gate to mint a verification link.
+        {latestVerificationId
+          ? "Paste any opaque ID or full verification URL."
+          : "Generate an asset through the gate to mint a verification link."}
       </p>
+      {latestVerificationId && (
+        <button
+          type="button"
+          data-testid="verify-latest-asset"
+          onClick={() => router.push(`/verify/${latestVerificationId}`)}
+          className="action-quiet mt-1 w-full justify-center"
+        >
+          <Sparkles className="h-4 w-4 text-warning" aria-hidden />
+          Verify latest generated demo asset
+        </button>
+      )}
     </form>
   );
 }

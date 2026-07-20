@@ -9,8 +9,9 @@
  */
 import { cookies } from "next/headers";
 import { DEMO_IDS } from "@/domain/fixtures";
-import type { Organization, Profile } from "@/domain/types";
+import type { GenerationRequest, Organization, Profile } from "@/domain/types";
 import { getStore } from "@/server/data";
+import { getEnv } from "@/server/env";
 
 const ROLE_COOKIE = "mithaq_role";
 
@@ -33,6 +34,7 @@ export async function setSessionRole(role: SessionRole): Promise<void> {
   store.set(ROLE_COOKIE, role, {
     httpOnly: true,
     sameSite: "lax",
+    secure: getEnv().appUrl.startsWith("https://"),
     path: "/",
     maxAge: 60 * 60 * 24 * 7,
   });
@@ -67,4 +69,16 @@ export async function requireRequesterSession(): Promise<
     throw new Error("This action requires the organization-requester role");
   }
   return session as Session & { organization: Organization };
+}
+
+/** Resource-level authorization shared by server actions and route pages. */
+export async function canAccessRequest(
+  session: Session,
+  request: GenerationRequest,
+): Promise<boolean> {
+  if (session.role === "requester") {
+    return request.organizationId === session.organization?.id;
+  }
+  const voice = await getStore().getVoice(request.voiceId);
+  return voice?.ownerId === session.profile.id;
 }

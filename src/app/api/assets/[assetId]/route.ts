@@ -27,6 +27,11 @@ export async function GET(
     if (asset.organizationId !== session.organization?.id) {
       return NextResponse.json({ error: "Not authorized" }, { status: 403 });
     }
+  } else {
+    const voice = await store.getVoice(asset.voiceId);
+    if (voice?.ownerId !== session.profile.id) {
+      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+    }
   }
 
   const bytes = await store.getAssetBytes(assetId);
@@ -37,12 +42,15 @@ export async function GET(
     );
   }
 
+  const extension = asset.mimeType === "audio/mpeg" ? "mp3" : "wav";
+
   return new NextResponse(new Uint8Array(bytes), {
     headers: {
       "Content-Type": asset.mimeType,
       "Content-Length": String(bytes.byteLength),
       "Cache-Control": "private, max-age=60",
-      "Content-Disposition": `inline; filename="mithaq-${asset.id}.wav"`,
+      "Content-Disposition": `inline; filename="mithaq-${asset.id}.${extension}"`,
+      "X-Content-Type-Options": "nosniff",
     },
   });
 }

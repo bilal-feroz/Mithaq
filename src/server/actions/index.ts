@@ -12,6 +12,7 @@ import { getEnv } from "@/server/env";
 import { getStore } from "@/server/data";
 import {
   getSession,
+  canAccessRequest,
   requireOwnerSession,
   requireRequesterSession,
   setSessionRole,
@@ -122,6 +123,10 @@ export async function rerunEvaluationAction(
 ): Promise<ActionResult<{ requestId: string }>> {
   try {
     const session = await getSession();
+    const request = await getStore().getRequest(requestId);
+    if (!request || !(await canAccessRequest(session, request))) {
+      throw new Error("Request not found or not authorized.");
+    }
     const outcome = await reevaluateRequest(requestId, session.profile.id);
     revalidatePath("/gate");
     revalidatePath("/console");
@@ -273,6 +278,7 @@ export async function resetDemoAction(): Promise<ActionResult<null>> {
       throw new Error("Demo reset is only available in demo mode.");
     }
     await getStore().reset();
+    await setSessionRole("owner");
     revalidatePath("/", "layout");
     return { ok: true, data: null };
   } catch (error) {

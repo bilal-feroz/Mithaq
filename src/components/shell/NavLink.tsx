@@ -27,11 +27,13 @@ export function NavLink({
   label,
   hint,
   iconName,
+  compact = false,
 }: {
   href: string;
   label: string;
   hint?: string;
   iconName: NavIconName;
+  compact?: boolean;
 }) {
   const pathname = usePathname();
   const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -42,6 +44,7 @@ export function NavLink({
       aria-current={active ? "page" : undefined}
       className={cn(
         "group flex items-center gap-3 rounded-[10px] px-3 py-2.5 transition-colors duration-150",
+        compact && "shrink-0 gap-2 rounded-full px-3.5 py-1.5",
         active
           ? "border border-border-glass bg-white/[0.06] text-text-primary"
           : "border border-transparent text-text-secondary hover:bg-white/[0.04] hover:text-text-primary",
@@ -49,7 +52,7 @@ export function NavLink({
     >
       <Icon
         className={cn(
-          "h-[17px] w-[17px] shrink-0",
+          compact ? "h-3.5 w-3.5 shrink-0" : "h-[17px] w-[17px] shrink-0",
           active
             ? "text-metal"
             : "text-text-muted group-hover:text-text-secondary",
@@ -58,7 +61,12 @@ export function NavLink({
         aria-hidden
       />
       <span className="min-w-0">
-        <span className="block text-[13.5px] font-medium leading-tight">
+        <span
+          className={cn(
+            "block font-medium leading-tight",
+            compact ? "text-[12.5px]" : "text-[13.5px]",
+          )}
+        >
           {label}
         </span>
         {hint && (

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { compareUploadedFile } from "@/server/services/verification";
 
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-const ALLOWED_MIME_PREFIXES = ["audio/", "video/", "application/octet-stream"];
+const ALLOWED_MIME_PREFIXES = ["audio/", "application/octet-stream"];
 
 /**
  * Public hash comparison: hashes the uploaded file and compares it with the
@@ -13,6 +13,14 @@ export async function POST(
   context: { params: Promise<{ verificationId: string }> },
 ) {
   const { verificationId } = await context.params;
+
+  const contentLength = Number(request.headers.get("content-length") ?? 0);
+  if (contentLength > MAX_UPLOAD_BYTES + 1024 * 1024) {
+    return NextResponse.json(
+      { error: "File must be between 1 byte and 25 MB" },
+      { status: 413 },
+    );
+  }
 
   const formData = await request.formData().catch(() => null);
   const file = formData?.get("file");

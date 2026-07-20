@@ -146,19 +146,25 @@ export async function AppShell({ children }: { children: ReactNode }) {
           className="mt-3 flex gap-1.5 overflow-x-auto pb-0.5"
         >
           {[
-            { href: "/", label: "Overview" },
-            { href: "/studio", label: "Consent Studio" },
-            { href: "/gate", label: "Generation Gate" },
-            { href: "/console", label: "Owner Console" },
-            { href: "/verify", label: "Verifier" },
+            { href: "/", label: "Overview", iconName: "overview" as const },
+            {
+              href: "/studio",
+              label: "Consent Studio",
+              iconName: "studio" as const,
+            },
+            {
+              href: "/gate",
+              label: "Generation Gate",
+              iconName: "gate" as const,
+            },
+            {
+              href: "/console",
+              label: "Owner Console",
+              iconName: "console" as const,
+            },
+            { href: "/verify", label: "Verifier", iconName: "verify" as const },
           ].map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="shrink-0 rounded-full border border-border-glass bg-white/[0.04] px-3.5 py-1.5 text-[12.5px] font-medium text-text-secondary transition-colors hover:text-text-primary"
-            >
-              {item.label}
-            </Link>
+            <NavLink key={item.href} {...item} compact />
           ))}
         </nav>
       </header>

@@ -104,8 +104,14 @@ describe("decision tokens", () => {
     };
     expect(findBindingMismatch(claims, context)).toBeNull();
     expect(
+      findBindingMismatch(claims, { ...context, decisionId: "dec-2" }),
+    ).toBe("TOKEN_DECISION_MISMATCH");
+    expect(
       findBindingMismatch(claims, { ...context, requestId: "req-2" }),
     ).toBe("TOKEN_REQUEST_MISMATCH");
+    expect(
+      findBindingMismatch(claims, { ...context, policyId: "policy-other" }),
+    ).toBe("TOKEN_POLICY_MISMATCH");
     expect(findBindingMismatch(claims, { ...context, policyVersion: 2 })).toBe(
       "TOKEN_POLICY_VERSION_MISMATCH",
     );
@@ -119,8 +125,14 @@ describe("decision tokens", () => {
       findBindingMismatch(claims, { ...context, organizationId: "org-else" }),
     ).toBe("TOKEN_ORGANIZATION_MISMATCH");
     expect(
+      findBindingMismatch(claims, { ...context, voiceId: "voice-else" }),
+    ).toBe("TOKEN_VOICE_MISMATCH");
+    expect(
       findBindingMismatch(claims, { ...context, provider: "elevenlabs" }),
     ).toBe("TOKEN_PROVIDER_MISMATCH");
+    expect(
+      findBindingMismatch(claims, { ...context, model: "different-model" }),
+    ).toBe("TOKEN_MODEL_MISMATCH");
   });
 
   it("redacts tokens for display", () => {

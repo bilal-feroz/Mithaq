@@ -755,6 +755,54 @@ export class SupabaseStore implements DataStore {
     if (error) throw new Error(error.message);
   }
 
+  async finalizeGeneration(
+    asset: GeneratedAsset,
+    bytes: Buffer,
+    grantId: string | null,
+    completedAt: string,
+  ) {
+    const storagePath = `${asset.id}`;
+    const { error: uploadError } = await this.client.storage
+      .from(ASSET_BUCKET)
+      .upload(storagePath, bytes, {
+        contentType: asset.mimeType,
+        upsert: false,
+      });
+    if (uploadError) throw new Error(uploadError.message);
+
+    const assetRow = {
+      id: asset.id,
+      verificationId: asset.verificationId,
+      decisionId: asset.decisionId,
+      requestId: asset.requestId,
+      policyId: asset.policyId,
+      policyVersion: asset.policyVersion,
+      voiceId: asset.voiceId,
+      organizationId: asset.organizationId,
+      storagePath,
+      sha256: asset.sha256,
+      mimeType: asset.mimeType,
+      byteLength: asset.byteLength,
+      provider: asset.provider,
+      providerAssetId: asset.providerAssetId,
+      createdAt: asset.createdAt,
+    };
+    const { error } = await this.client.rpc("finalize_generation", {
+      p_asset: assetRow,
+      p_grant_id: grantId,
+      p_completed_at: completedAt,
+    });
+    if (error) {
+      // The database transaction rolled back. Remove the private object so a
+      // failed/concurrent finalization cannot leave an orphaned demo asset.
+      await this.client.storage.from(ASSET_BUCKET).remove([storagePath]);
+      throw new Error(error.message);
+    }
+    const policy = await this.getPolicy(asset.policyId);
+    if (!policy) throw new Error(`Policy not found: ${asset.policyId}`);
+    return policy;
+  }
+
   async getAsset(id: string) {
     return this.one(
       this.client

@@ -22,7 +22,11 @@ const rawEnvSchema = z.object({
     .optional()
     .or(z.literal("").transform(() => undefined)),
 
-  NEXT_PUBLIC_SUPABASE_URL: z.string().optional(),
+  NEXT_PUBLIC_SUPABASE_URL: z
+    .string()
+    .url()
+    .optional()
+    .or(z.literal("").transform(() => undefined)),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional(),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
 
@@ -32,9 +36,8 @@ const rawEnvSchema = z.object({
     .optional()
     .or(z.literal("").transform(() => undefined)),
 
-  AI_PROVIDER: z.enum(["mock", "anthropic", "openai"]).default("mock"),
+  AI_PROVIDER: z.enum(["mock", "anthropic"]).default("mock"),
   ANTHROPIC_API_KEY: z.string().optional(),
-  OPENAI_API_KEY: z.string().optional(),
 
   VOICE_PROVIDER: z.enum(["mock", "elevenlabs"]).default("mock"),
   ELEVENLABS_API_KEY: z.string().optional(),
@@ -51,9 +54,8 @@ export type MithaqEnv = {
   /** True when the secret was generated per-boot instead of provided. */
   ephemeralTokenSecret: boolean;
 
-  aiProvider: "mock" | "anthropic" | "openai";
+  aiProvider: "mock" | "anthropic";
   anthropicApiKey: string | null;
-  openaiApiKey: string | null;
 
   voiceProvider: "mock" | "elevenlabs";
   elevenLabsApiKey: string | null;
@@ -78,6 +80,14 @@ export function getEnv(): MithaqEnv {
   }
   const raw = parsed.data;
 
+  const hasSupabaseUrl = Boolean(raw.NEXT_PUBLIC_SUPABASE_URL);
+  const hasSupabaseServiceKey = Boolean(raw.SUPABASE_SERVICE_ROLE_KEY);
+  if (hasSupabaseUrl !== hasSupabaseServiceKey) {
+    throw new Error(
+      "Supabase configuration is incomplete. Set both NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY, or leave both empty for demo mode.",
+    );
+  }
+
   const supabase =
     raw.NEXT_PUBLIC_SUPABASE_URL && raw.SUPABASE_SERVICE_ROLE_KEY
       ? {
@@ -97,15 +107,15 @@ export function getEnv(): MithaqEnv {
       "AI_PROVIDER=anthropic requires ANTHROPIC_API_KEY. Remove the setting to fall back to the mock adapter.",
     );
   }
-  if (raw.AI_PROVIDER === "openai" && !raw.OPENAI_API_KEY) {
-    throw new Error(
-      "AI_PROVIDER=openai requires OPENAI_API_KEY. Remove the setting to fall back to the mock adapter.",
-    );
-  }
 
   let decisionTokenSecret = raw.DECISION_TOKEN_SECRET ?? null;
   let ephemeralTokenSecret = false;
   if (!decisionTokenSecret) {
+    if (supabase) {
+      throw new Error(
+        "DECISION_TOKEN_SECRET is required when Supabase is configured. Use a stable secret of at least 32 characters.",
+      );
+    }
     decisionTokenSecret = randomBytes(48).toString("base64url");
     ephemeralTokenSecret = true;
     // Tokens are 60-second single-use and never leave the server, so an
@@ -123,7 +133,6 @@ export function getEnv(): MithaqEnv {
     ephemeralTokenSecret,
     aiProvider: raw.AI_PROVIDER,
     anthropicApiKey: raw.ANTHROPIC_API_KEY ?? null,
-    openaiApiKey: raw.OPENAI_API_KEY ?? null,
     voiceProvider: raw.VOICE_PROVIDER,
     elevenLabsApiKey: raw.ELEVENLABS_API_KEY ?? null,
     elevenLabsDefaultVoiceId: raw.ELEVENLABS_DEFAULT_VOICE_ID ?? null,

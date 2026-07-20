@@ -11,6 +11,8 @@ type CompareResult = {
   registeredSha256: string;
 };
 
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
 /**
  * Exact-file verification: hashes an uploaded file server-side and compares
  * it with the registered master. We never claim to know WHAT changed — only
@@ -24,6 +26,16 @@ export function HashCompare({ verificationId }: { verificationId: string }) {
   const [fileName, setFileName] = useState<string | null>(null);
 
   async function compare(file: File) {
+    if (file.size === 0 || file.size > MAX_UPLOAD_BYTES) {
+      setResult(null);
+      setError("Choose an audio file between 1 byte and 25 MB.");
+      return;
+    }
+    if (file.type && !file.type.startsWith("audio/")) {
+      setResult(null);
+      setError("Only audio files can be compared.");
+      return;
+    }
     setBusy(true);
     setError(null);
     setResult(null);

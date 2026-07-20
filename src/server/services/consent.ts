@@ -224,6 +224,12 @@ export async function revokePolicy(
     throw new Error("Only the voice owner can revoke this policy.");
   }
 
+  if (policy.status === "revoked") return policy;
+  const latest = await store.getLatestPolicyForVoice(policy.voiceId);
+  if (policy.status !== "active" || latest?.id !== policy.id) {
+    throw new Error("Only the current active policy can be revoked.");
+  }
+
   const now = new Date().toISOString();
   const revoked = await store.revokePolicy(policyId, now);
   await store.appendAuditEvent({

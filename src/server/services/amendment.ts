@@ -144,6 +144,22 @@ export async function decideAmendment(
   const amendment = await store.getAmendment(amendmentId);
   if (!amendment) throw new Error("Amendment not found.");
   if (amendment.status !== "pending") {
+    if (amendment.status === verdict) {
+      const [newPolicy, rerunDecision, request] = await Promise.all([
+        amendment.resultingPolicyId
+          ? store.getPolicy(amendment.resultingPolicyId)
+          : Promise.resolve(null),
+        amendment.status === "approved"
+          ? store.getLatestDecisionForRequest(amendment.requestId)
+          : Promise.resolve(null),
+        store.getRequest(amendment.requestId),
+      ]);
+      const rerun =
+        newPolicy && rerunDecision && request
+          ? { request, decision: rerunDecision, policy: newPolicy }
+          : null;
+      return { amendment, newPolicy, rerun };
+    }
     throw new Error(`This amendment was already ${amendment.status}.`);
   }
   const voice = await store.getVoice(amendment.voiceId);
