@@ -4,7 +4,6 @@ import {
   buildCompliantRequest,
   buildDemoPolicyV1,
   DEMO_CAMPAIGN_NAME,
-  DEMO_IDS,
   FIXED_NOW,
   INJECTION_SCRIPT,
 } from "./fixtures";

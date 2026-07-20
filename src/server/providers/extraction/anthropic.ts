@@ -8,15 +8,11 @@
  */
 import Anthropic from "@anthropic-ai/sdk";
 import { zodOutputFormat } from "@anthropic-ai/sdk/helpers/zod";
-import { z } from "zod";
-import {
-  extractionResultSchema,
-  languageSchema,
-  platformSchema,
-  purposeSchema,
-  type ExtractionResult,
-} from "@/domain/schemas";
-import type { Language } from "@/domain/types";
+// The SDK's structured-output helper expects Zod v4 schemas; zod@3.25+
+// ships the v4 API under the "zod/v4" subpath alongside our v3 domain schemas.
+import { z as z4 } from "zod/v4";
+import { extractionResultSchema, type ExtractionResult } from "@/domain/schemas";
+import { LANGUAGES, PLATFORMS, PURPOSES, type Language } from "@/domain/types";
 import type { ConsentExtractionAdapter } from "./types";
 
 /**
@@ -24,22 +20,22 @@ import type { ConsentExtractionAdapter } from "./types";
  * the JSON schema sent to the model is exact. Our normalizing domain schema
  * runs over the result afterwards.
  */
-const wireSchema = z.object({
-  draft: z.object({
-    authorizedOrganizationNames: z.array(z.string()),
-    allowedPurposes: z.array(purposeSchema),
-    allowedPlatforms: z.array(platformSchema),
-    allowedLanguages: z.array(languageSchema),
-    allowedTerritories: z.array(z.string()),
-    paidAdvertising: z.enum(["allowed", "prohibited"]).nullable(),
-    maximumAssets: z.number().int().nullable(),
-    validUntil: z.string().nullable(),
-    prohibitedTopics: z.array(z.string()),
+const wireSchema = z4.object({
+  draft: z4.object({
+    authorizedOrganizationNames: z4.array(z4.string()),
+    allowedPurposes: z4.array(z4.enum(PURPOSES)),
+    allowedPlatforms: z4.array(z4.enum(PLATFORMS)),
+    allowedLanguages: z4.array(z4.enum(LANGUAGES)),
+    allowedTerritories: z4.array(z4.string()),
+    paidAdvertising: z4.enum(["allowed", "prohibited"]).nullable(),
+    maximumAssets: z4.number().int().nullable(),
+    validUntil: z4.string().nullable(),
+    prohibitedTopics: z4.array(z4.string()),
   }),
-  missingFields: z.array(z.string()),
-  ambiguousFields: z.array(z.object({ field: z.string(), note: z.string() })),
-  confidenceNotes: z.array(z.string()),
-  clarificationQuestions: z.array(z.string()),
+  missingFields: z4.array(z4.string()),
+  ambiguousFields: z4.array(z4.object({ field: z4.string(), note: z4.string() })),
+  confidenceNotes: z4.array(z4.string()),
+  clarificationQuestions: z4.array(z4.string()),
 });
 
 const SYSTEM_PROMPT = `You extract structured consent terms from a voice owner's natural-language consent statement for the MITHAQ voice-authorization gateway.
